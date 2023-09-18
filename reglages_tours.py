@@ -4,24 +4,24 @@ from kivy.metrics import dp
 
 tours = [
     {
-        "nom": "Basique2",
-        "degats_physiques": 10,
+        "nom": "Basique",
+        "degats_physiques": 15,
         "degats_magiques": 0,
-        "temps_entre_attaque": 1.5,  # en secondes
+        "temps_entre_attaque": .7,  # en secondes
         "taille": (dp(50), dp(50)),  # Largeur x Hauteur
         "couleur": [1, 0.5, 0.5, 1],
-        "range": 100,
+        "range": dp(150),
         "projectile_color": [1, 0.5, 0.5, 1],
         'cost': 50
     },
     {
-        "nom": "Magique2",
+        "nom": "Magique",
         "degats_physiques": 5,
         "degats_magiques": 20,
-        "temps_entre_attaque": 2,
+        "temps_entre_attaque": 1,
         "taille": (dp(50), dp(50)),
         "couleur": [0, 0, 1, 1],  # Bleu
-        "range": 50,
+        "range": dp(100),
         "projectile_color": [0, 0, 1, 1],  # Bleu
         'cost': 50
     },
@@ -29,12 +29,23 @@ tours = [
         "nom": "Rapide",
         "degats_physiques": 5,
         "degats_magiques": 0,
-        "temps_entre_attaque": 1,
-        "taille": (dp(25), dp(25)),
+        "temps_entre_attaque": .5,
+        "taille": (dp(50), dp(50)),
         "couleur": [0, 1, 0, 1],  # Vert
-        "range": 70,
+        "range": dp(100),
         "projectile_color": [0, 1, 0, 1],  # Vert
         'cost': 50
+    },
+    {
+        "nom": "Ice",
+        "degats_physiques": 5,  # ou un autre nombre approprié
+        "degats_magiques": 0,
+        "temps_entre_attaque": 1,  # ou un autre nombre approprié
+        "taille": (dp(50), dp(50)),
+        "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
+        "range": dp(80),  # ou un autre nombre approprié
+        "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
+        'cost': 60  # ou un autre nombre approprié
     }
     # Ajoutez d'autres configurations de tours ici si nécessaire
 ]

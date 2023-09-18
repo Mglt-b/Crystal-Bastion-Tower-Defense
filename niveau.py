@@ -63,54 +63,137 @@ def generate_random_path(grid_size, path_length, min_turns):
 
     print(f"Generated path: {path}")
     return path
-
-
 #random generate : generate_random_path(8, 100000, 5)
 
-path_level_1 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25, 0.6), (0.375, 0.6), 
+def generate_sol(positions):
+    """Génère une liste 'sol' basée sur les positions fournies."""
+    return [{"type": "plancher", "position": position} for position in positions]
+
+types_decor = {
+    "arbre": {"image": "decor_image/arbre_image_1.png", "size": (40, 40)},
+    "rocher": {"image": "decor_image/rocher_image_1.png", "size": (40, 40)},
+    # ... Ajoutez d'autres types de décor ici
+}
+
+types_sol = {
+    "plancher": {"image": "decor_image/wooden.png", "size": (40, 40)},
+    # ... Ajoutez d'autres types de décor ici
+}
+
+path_level_1 = [(0.0, 0.6), (1, 0.6)]
+
+
+path_level_2 = [(0.0, 0.6), (0.125, 0.6), (0.3, 0.6),
+                (0.7, 0.6), (0.7, 0.4), (0.2, 0.4),
+                (0.1, 0.2),(0.8, 0.2),
+                (0.8, 0.8),
+                (0, 0.9)] #fin
+
+path_level_3 = [(0.0, 0.6), (0.0, 0.7), (0.1, 0.7), (0.1, 0.8), (0.2, 0.8), (0.3, 0.8), (0.3, 0.9), (0.4, 0.9), (0.5, 0.9), (0.6, 0.9), (0, 0.9)]
+
+path_level_4 =[(0.0, 0.6), (0.1, 0.6), (0.1, 0.7), (0.1, 0.8), (0.2, 0.8), (0.3, 0.8), (0.3, 0.9), (0.3, 1.0), (0.2, 1.0), (0, 0.9)]
+
+path_level_5 =[(0.0, 0.6), (0.1, 0.6), (0.1, 0.7), (0.1, 0.8), (0.2, 0.8), (0.3, 0.8), (0.3, 0.9), (0.3, 1.0), (0.2, 1.0), (0, 0.9)]
+
+
+path_level_6 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
+            (0.25,0.35),(0.25,0.225),
+            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
+ 
+path_level_7 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
+            (0.25,0.35),(0.25,0.225),
+            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
+
+path_level_8 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
+            (0.25,0.35),(0.25,0.225),
+            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
+
+
+
+path_level_10 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25, 0.6), (0.375, 0.6), 
                 (0.375, 0.475), (0.5, 0.475), (0.5, 0.35), (0.475, 0.35), (0.25, 0.35), (0.25, 0.475), 
                 (0.125, 0.475), (0.125, 0.21), (0.9, 0.21), (0.9, 0.5), (0.7, 0.5), (0.7, 0.6),
-                (0.9, 0.6), (0.9, 0.9), (0, 0.9)]
-
-
-path_level_2 = [(0.0, 0.6), (0.125, 0.6), (0, 0.9)]
-
+                (0.9, 0.6), (0.9, 0.9), 
+                (0, 0.9)] #fin
 
 niveaux = [
     {
-        "path": path_level_1,
+        "path": path_level_1 ,
         "monsters": [
+            {"type": "normal", "count": 1},
+            {"type": "rapide", "count": 2},
             {"type": "normal", "count": 10},
-            {"type": "rapide", "count": 12}
-        ]
+            {"type": "tank", "count": 1},
+            {"type": "rapide", "count": 12},
+                    ],
+        "decor": [],
+        "sol": [],
     },
     {
         "path": path_level_2,
         "monsters": [
             {"type": "normal", "count": 10},
             {"type": "rapide", "count": 12}
-        ]
+                    ],
+        "decor": [],
+        "sol": [],
     },
     {
-        "path": path_level_2,
+        "path": path_level_3,
+        "monsters": [
+            {"type": "normal", "count": 1},
+            {"type": "rapide", "count": 0}
+                    ],
+        "decor": [],
+        "sol": [],
+    },
+    {
+        "path": path_level_4,
         "monsters": [
             {"type": "normal", "count": 10},
             {"type": "rapide", "count": 12}
-        ]
+                    ],
+        "decor": [],
+        "sol": [],
     },
     {
-        "path": path_level_2,
+        "path": path_level_5,
         "monsters": [
             {"type": "normal", "count": 10},
             {"type": "rapide", "count": 12}
-        ]
+                    ],
+        "decor": [],
+        "sol": [],
     },
     {
-        "path": path_level_2,
+        "path": path_level_6,
         "monsters": [
             {"type": "normal", "count": 10},
             {"type": "rapide", "count": 12}
-        ]
+                    ],
+        "decor": [],
+        "sol": [],
+    },
+    {
+        "path": path_level_7,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [],
+    },
+    {
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [],
     },
     # ... Ajoutez d'autres niveaux ici
 ]
+
+
+

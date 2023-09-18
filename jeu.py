@@ -5,8 +5,10 @@ from kivy.uix.widget import Widget
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from kivy.graphics import Rectangle, Color, Line, Ellipse
+from kivy.uix.button import Button
+from kivy.metrics import dp, sp
 
-from niveau import niveaux
+from niveau import niveaux, types_decor, types_sol
 from monstres import Monstre
 from tour import Tour
 from kivy.clock import Clock
@@ -26,9 +28,15 @@ from functools import partial
 from reglages_tours import tour_dict
 from kivy.app import App
 
+from kivy.uix.image import Image
+
+from kivy.uix.popup import Popup
+import math
+from kivy.graphics.context_instructions import PushMatrix, PopMatrix, Translate, Rotate
+
+
 # Pour que l'application soit toujours en mode portrait
-Window.size = (360, 640)
-Window.rotation = 0
+
 
 # jeu.py
 tour_selected = False
@@ -43,9 +51,9 @@ class TourSelectionZone(BoxLayout):
 
         self.orientation = 'horizontal'
         self.size_hint_y = None
-        self.height = 100  # Hauteur fixe pour la zone de sélection des tours
-        self.spacing=30
-        self.padding=[10,0,0,0]
+        self.height = dp(100)  # Hauteur fixe pour la zone de sélection des tours
+        self.spacing=dp(30)
+        self.padding=[dp(10),0,0,0]
 
         # Ajout de l'arrière-plan
         with self.canvas.before:
@@ -56,10 +64,10 @@ class TourSelectionZone(BoxLayout):
         # Ajout de toutes les tours disponibles
         for tour_config in tours:
             # Création d'un layout vertical pour empiler le label et la tour
-            tour_layout = BoxLayout(orientation='vertical', size_hint=(None, 1), width=tour_config["taille"][0], spacing=5)
+            tour_layout = BoxLayout(orientation='vertical', size_hint=(None, 1), width=tour_config["taille"][0], spacing=dp(5))
             
             # Création et ajout du label avec le nom et le coût de la tour
-            tour_label = Label(text=f"{tour_config['nom']}\n{tour_config['cost']} coins",height=tour_config["taille"][1], width=tour_config["taille"][0], size_hint_y=.5, font_size=10)
+            tour_label = Label(text=f"{tour_config['nom']}\n{tour_config['cost']} coins",height=tour_config["taille"][1], width=tour_config["taille"][0], size_hint_y=.5, font_size=dp(10))
             tour_layout.add_widget(tour_label)
             
             # Création et ajout de la représentation de la tour
@@ -81,70 +89,150 @@ class TourSelectionZone(BoxLayout):
 class MapZone(Widget):
     tours = ListProperty([])
     def __init__(self, niveau, **kwargs):
-        print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
+        #print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
         self.lives = super().__init__(**kwargs)
         self.niveau = niveau
         self.path_points = []
         self.dragging_tour = None  # Pour suivre la tour que nous déplaçons
         self.tower_drag_start_pos = None  # Pour sauvegarder la position d'origine de la tour
-
+        
         with self.canvas:
-            Color(1, 0, 0, 1)  # Rouge pour le chemin
-            self.path = Line(points=[], width=2)
-        self.bind(size=self.on_size)
+            Color(1, 0, 0, 0)  # Rouge pour le chemin
+            self.path = Line(points=[], width=0)
+        
+        # Mettez à jour self.path.points après avoir dessiné les rectangles
+        adjusted_path = [(p[0]*self.width, p[1]*self.height) for p in self.niveau["path"]]
+        self.path.points = self.flatten_path(adjusted_path)
 
         self.coins = 200
         
-
-        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(10, Window.height - 30), color="red")
+        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(10), Window.height - dp(30)), color="red")
         self.pieces_label.id = 'pieces_label'  # Ajout d'un ID
         self.add_widget(self.pieces_label)
 
-        self.lives = 2  # Initialize with 20 lives
-        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(150, Window.height - 30), color="blue")
+        self.lives = 20  # Initialize with 20 lives
+        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(30)), color="blue")
         self.add_widget(self.lives_label)
-        print("Fin de l'initialisation de MapZone")   # Ajouté pour le débogage
+        #print("Fin de l'initialisation de MapZone")   # Ajouté pour le débogage
 
         self.bind(size=self.update_labels_position)
 
+        self.scheduled_monster_events = []  # Ajoutez ceci pour stocker les événements programmés
+
+        Clock.schedule_once(self.add_decor, .1)
+
+        # Ajoutez ces deux lignes pour initialiser les compteurs de monstres
+        self.current_monsters = 0  # Nombre de monstres actuellement dans le jeu
+
+    def calculate_distance(self,p1, p2):
+        """Calculate the distance between two points."""
+        return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+
+    def calculate_angle(self,p1, p2):
+        """Calculate the angle (in radians) between two points."""
+        return math.atan2(p2[1] - p1[1], p2[0] - p1[0])
+
+    def add_decor(self, dt):
+        # Instanciation des éléments de décor
+        for decor_item in self.niveau["decor"]:
+            decor_type = decor_item["type"]
+            image_path = types_decor[decor_type]["image"]
+            size = decor_item.get("size", types_decor[decor_type]["size"])  # Utilisez la taille fournie ou la taille par défaut
+            
+            # Convertir les proportions en coordonnées de pixels
+            x_pixel = decor_item["position"][0] * self.width
+            y_pixel = decor_item["position"][1] * self.height
+
+            position_pixel = (x_pixel, y_pixel)
+            
+            decor_widget = Image(source=image_path, size=size, pos=position_pixel)
+            self.add_widget(decor_widget)
+
+
+        # Instanciation des éléments du sol
+        for sol_item in self.niveau["sol"]:
+            sol_type = sol_item["type"]
+            image_path = types_sol[sol_type]["image"]
+            size = sol_item.get("size", types_sol[sol_type]["size"])  # Utilisez la taille fournie ou la taille par défaut
+            
+            # Convertir les proportions en coordonnées de pixels
+            x_pixel = sol_item["position"][0] * self.width
+            y_pixel = sol_item["position"][1] * self.height
+
+            position_pixel = (x_pixel, y_pixel)
+            
+            sol_widget = Image(source=image_path, size=size, pos=position_pixel)
+            self.add_widget(sol_widget)
+        
+        self.draw_texture()
+
     def update_labels_position(self, *args):
-        self.pieces_label.pos = (10, self.height - 30)
-        self.lives_label.pos = (150, self.height - 30)
+        self.pieces_label.pos = (dp(10), self.height)
+        self.lives_label.pos = (dp(150), self.height)
         
     def on_size(self, *args):
-        print('Debug: self.width:', self.width)
-        print('Debug: self.height:', self.height)
         adjusted_path = [(p[0]*self.width, p[1]*self.height) for p in self.niveau["path"]]
-        print('Debug: adjusted_path:', adjusted_path)
         self.path.points = self.flatten_path(adjusted_path)
+        
+    def draw_texture(self):
+        self.texture = Image(source='decor_image/wooden.png').texture
+        self.line_width = dp(20)
+        print("self.path_points:", self.path_points)
+        
+        with self.canvas.before:
+            Color(1, 1, 1, 1)  # Couleur blanche pour bien voir le rectangle
+            for i in range(len(self.path_points) - 1):
+                start_point = (self.path_points[i][0] * self.width, self.path_points[i][1] * self.height)
+                end_point = (self.path_points[i + 1][0] * self.width, self.path_points[i + 1][1] * self.height)
+                
+                # Calculez la distance et l'angle
+                distance = self.calculate_distance(start_point, end_point)
+                angle = math.degrees(self.calculate_angle(start_point, end_point))
+                
+                # Ajustez la position pour centrer le rectangle sur le segment de chemin
+                mid_point = ((start_point[0] + end_point[0]) / 2, (start_point[1] + end_point[1]) / 2)
+                rectangle_position = (mid_point[0] - distance / 2, mid_point[1] - self.line_width / 2)
+
+                # Dessinez le rectangle texturé
+                PushMatrix()
+                Translate(rectangle_position[0], rectangle_position[1])
+                Rotate(angle=angle, origin=(distance / 2, self.line_width / 2))
+                Rectangle(pos=(0, 0), size=(distance, self.line_width), texture=self.texture)
+                PopMatrix()
 
     def flatten_path(self, path):
         """Transforme une liste de points (x, y) en une liste plate pour Kivy."""
         return [coord for point in path for coord in point]
 
     def start_level(self, niveau):
-        print("Démarrage du niveau avec la configuration :", niveau)
+        #print("Démarrage du niveau avec la configuration :", niveau)
         self.path_points = niveau["path"]
-        print(niveau["path"])
+
         delay = 0
         path = niveau["path"]
+        
         for monster_info in niveau["monsters"]:
             for _ in range(monster_info["count"]):
-                print("Programmation de l'appel à add_monster avec un délai de :", delay)
-                Clock.schedule_once(partial(self.add_monster, monster_info=monster_info, path=path), delay)
-                print("Appel à add_monster programmé.")
+                #print("Programmation de l'appel à add_monster avec un délai de :", delay)
+                event = Clock.schedule_once(partial(self.add_monster, monster_info=monster_info, path=path), delay)
+                #print("Appel à add_monster programmé.")
+                self.scheduled_monster_events.append(event)
                 delay += 2
-
+                # Ajoutez cette ligne pour incrémenter le compteur total de monstres lorsqu'un nouveau monstre apparaît
+                             
     def add_monster(self, dt,monster_info, path):
         self._add_monster(monster_info, path)
 
     def _add_monster(self, monster_info, path):
         monster_type = monstre_configurations[monster_info["type"]]
         monster = Monstre(type_monstre=monster_type, path=path, map_size=self.size)
+        print("monster added :", monster)
         app = App.get_running_app()
         app.active_monsters.append(self)
         monster.bind(on_monster_death=self.add_coins)
         self.add_widget(monster)
+        self.current_monsters += 1 
+        print("'self.current_monsters' : ", self.current_monsters)
 
     def on_touch_down(self, touch):
 
@@ -193,14 +281,6 @@ class MapZone(Widget):
                 if hasattr(self.dragging_tour, 'range_circle') and self.dragging_tour.range_circle:
                     self.dragging_tour.canvas.before.remove(self.dragging_tour.range_circle)
 
-                # Dessinez un cercle semi-transparent autour de la tour
-                with self.dragging_tour.canvas.before:
-                    Color(1, 1, .7, 0.5)  # Jaune avec 50% d'opacité
-                    self.dragging_tour.range_circle = Ellipse(
-                        pos=(self.dragging_tour.center_x - self.dragging_tour.range, self.dragging_tour.center_y - self.dragging_tour.range),
-                        size=(self.dragging_tour.range*2, self.dragging_tour.range*2)
-                    )
-
                 collision_detected = False
 
                 # Vérifiez si la tour est en collision avec MapZone
@@ -210,7 +290,7 @@ class MapZone(Widget):
                 if (self.dragging_tour.x < self.x or tour_right > self.right or
                     self.dragging_tour.y < self.y or tour_top > self.top):
                     self.dragging_tour.tower_image.source = os.path.join(self.dragging_tour.img_directory, f"tower_Impossible.png")
-                    print("collision with MapZone")
+                    #print("collision with MapZone")
                     collision_detected = True
                 # Vérifiez si la tour est en collision avec le chemin
                 elif self.collides_with_path(self.dragging_tour.pos, self.dragging_tour.size):
@@ -222,7 +302,7 @@ class MapZone(Widget):
                     for tour in self.tours:
                         if tour.collide_point(*touch.pos):
                             self.dragging_tour.tower_image.source = os.path.join(self.dragging_tour.img_directory, f"tower_Impossible.png")
-                            print("collision tour")
+                            #print("collision tour")
                             collision_detected = True
                             break
 
@@ -231,6 +311,22 @@ class MapZone(Widget):
                     self.dragging_tour.color = self.dragging_tour.initial_color  # Réinitialisez à la couleur initiale
                     self.dragging_tour.tower_image.source = os.path.join(self.dragging_tour.img_directory, f"tower_{self.dragging_tour.name}.png")
 
+                    # Dessinez un cercle semi-transparent autour de la tour
+                    with self.dragging_tour.canvas.before:
+                        Color(1, 1, .7, 0.5)  # Jaune avec 50% d'opacité
+                        self.dragging_tour.range_circle = Ellipse(
+                            pos=(self.dragging_tour.center_x - self.dragging_tour.range, self.dragging_tour.center_y - self.dragging_tour.range),
+                            size=(self.dragging_tour.range*2, self.dragging_tour.range*2)
+                        )
+                else:
+                    # Dessinez un cercle semi-transparent autour de la tour
+                    with self.dragging_tour.canvas.before:
+                        Color(1, 0, 0, 0.5)  # Jaune avec 50% d'opacité
+                        self.dragging_tour.range_circle = Ellipse(
+                            pos=(self.dragging_tour.center_x - self.dragging_tour.range, self.dragging_tour.center_y - self.dragging_tour.range),
+                            size=(self.dragging_tour.range*2, self.dragging_tour.range*2)
+                        )
+
                 return True
             return super().on_touch_move(touch)
         except Exception as e:
@@ -238,47 +334,48 @@ class MapZone(Widget):
 
     def on_touch_up(self, touch):
 
-        if self.dragging_tour.tower_image.source.endswith("tower_Impossible.png"):
-            # Supprimez simplement la tour "fantôme" et n'ajoutez pas de nouvelle tour.
-            self.remove_widget(self.dragging_tour)
-        else:
-            try:
-                if self.dragging_tour:
-                    # Si la tour ne touche pas le chemin, placez-la
-                    if self.dragging_tour.color != [1, 0, 0, 1]:
-                        if not hasattr(self.dragging_tour, 'colliding_with_path') or not self.dragging_tour.colliding_with_path:
-                            
-                            # Créez une nouvelle instance de la tour avec les mêmes attributs que dragging_tour
-                            tour_name = self.dragging_tour.name
-                            color = self.dragging_tour.color
-                            size = self.dragging_tour.size
-                            new_tour = Tour(tour_name, size, color)
-                            self.tours.append(new_tour)
-                            new_tour.pos = self.dragging_tour.pos
-                            new_tour.active = True
-                            new_tour.dragged = True
-                            
-                            # Ajoutez la nouvelle instance de la tour à MapZone
-                            self.add_widget(new_tour)
-                            
-                            # Supprimez la tour "fantôme" du widget principal
-                            self.remove_widget(self.dragging_tour)
+        if self.dragging_tour:
+            if self.dragging_tour.tower_image.source.endswith("tower_Impossible.png"):
+                # Supprimez simplement la tour "fantôme" et n'ajoutez pas de nouvelle tour.
+                self.remove_widget(self.dragging_tour)
+            else:
+                try:
+                    if self.dragging_tour:
+                        # Si la tour ne touche pas le chemin, placez-la
+                        if self.dragging_tour.color != [1, 0, 0, 1]:
+                            if not hasattr(self.dragging_tour, 'colliding_with_path') or not self.dragging_tour.colliding_with_path:
+                                
+                                # Créez une nouvelle instance de la tour avec les mêmes attributs que dragging_tour
+                                tour_name = self.dragging_tour.name
+                                color = self.dragging_tour.color
+                                size = self.dragging_tour.size
+                                new_tour = Tour(tour_name, size, color)
+                                self.tours.append(new_tour)
+                                new_tour.pos = self.dragging_tour.pos
+                                new_tour.active = True
+                                new_tour.dragged = True
+                                
+                                # Ajoutez la nouvelle instance de la tour à MapZone
+                                self.add_widget(new_tour)
+                                
+                                # Supprimez la tour "fantôme" du widget principal
+                                self.remove_widget(self.dragging_tour)
 
-                            # Réinitialisez dragging_tour à None
-                            self.dragging_tour = None
+                                # Réinitialisez dragging_tour à None
+                                self.dragging_tour = None
 
-                            self.coins -= self.cout
-                            self.pieces_label.text = str(f'Pièces: {self.coins}')
+                                self.coins -= self.cout
+                                self.pieces_label.text = str(f'Pièces: {self.coins}')
 
 
 
-                else:
-                    self.remove_widget(self.dragging_tour)
-                    return True
-                
+                    else:
+                        self.remove_widget(self.dragging_tour)
+                        return True
+                    
 
-            except Exception as e:
-                print("Err:", e)
+                except Exception as e:
+                    print("Err:", e)
             
     def collides_with_path(self, tour_pos, tour_size):
         x, y = tour_pos
@@ -336,7 +433,6 @@ class MapZone(Widget):
 
         return ccw(l1_p1, l2_p1, l2_p2) != ccw(l1_p2, l2_p1, l2_p2) and ccw(l1_p1, l1_p2, l2_p1) != ccw(l1_p1, l1_p2, l2_p2)
     
-
     def add_coins(self, instance, value):
         self.coins += value
         self.pieces_label.text = str(f'Pièces: {self.coins}')

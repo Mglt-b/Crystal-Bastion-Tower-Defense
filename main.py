@@ -1,22 +1,31 @@
-from niveau import niveaux
+from kivy import platform
+if platform == "win":   
+    from kivy.modules.screen import apply_device
+    #(device, scale, orientation)
+    apply_device("phone_iphone_4",1,"portrait") 
 
-from jeu import MapZone
+from jeu import MapZone, MainLayout
 from niveau import niveaux
 
 from kivymd.app import MDApp
+
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
-from jeu import MapZone, MainLayout
+from kivy.clock import Clock
+from kivy.metrics import dp, sp
+
 from functools import partial
 
-from kivy.clock import Clock
+
+
+
 
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', padding=[50, 50], spacing=20)
+        layout = BoxLayout(orientation='vertical', padding=[dp(50), dp(50)], spacing=dp(20))
 
         # Dynamically create buttons for each level
         for index, niveau in enumerate(niveaux):
@@ -39,19 +48,19 @@ class GameScreen(Screen):
         self.map_zone = None
 
     def start_game(self, niveau):
-        print("Début de start_game")  # Ajouté pour le débogage
+        #print("Début de start_game")  # Ajouté pour le débogage
         self.niveau = niveau
         self.main_layout = MainLayout(niveau)  # Initialise MainLayout avec le niveau choisi
         self.add_widget(self.main_layout)  # Assurez-vous d'ajouter MainLayout à GameScreen
         self.map_zone = self.main_layout.map_zone  # Accédez à MapZone à partir de MainLayout
 
         # Binding the events
-        print("map_zone avant liaison:", self.map_zone)  # Ajouté pour le débogage
+        #print("map_zone avant liaison:", self.map_zone)  # Ajouté pour le débogage
         self.map_zone.bind(on_level_completed=self.return_to_menu)
         self.map_zone.bind(on_game_over=self.return_to_menu)
 
         self.manager.current = 'game'
-        print("Fin de start_game")   # Ajouté pour le débogage
+        #print("Fin de start_game")   # Ajouté pour le débogage
         
     # Function to return to the main menu
     def return_to_menu(self, *args):
@@ -71,22 +80,11 @@ class MenuApp(MDApp):
         self.scheduled_functions = []
         self.active_monsters = []
 
+        self.game_over_popup_shown = False
+        self.game_win_popup_shown = False
         return sm
 
         
-
-    def schedule_function(self, func, *args, **kwargs):
-        event = Clock.schedule_interval(func, *args, **kwargs)
-        self.scheduled_functions.append((func, event, args, kwargs))
-
-    def unschedule_all(self):
-        for func, event, args, kwargs in self.scheduled_functions:
-            Clock.unschedule(event)
-
-    def reschedule_all(self):
-        for func, event, args, kwargs in self.scheduled_functions:
-            self.schedule_function(func, *args, **kwargs)
-
 
 
 if __name__ == '__main__':

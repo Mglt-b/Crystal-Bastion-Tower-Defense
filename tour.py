@@ -6,7 +6,7 @@ from kivy.clock import Clock, partial
 
 from monstres import Monstre
 from reglages_tours import tour_dict
-from projectile import Projectile
+from projectile import Projectile, IceProjectile
 
 from kivymd.uix.button import MDIconButton
 
@@ -14,6 +14,7 @@ from ameliorations_tours import ameliorations
 from kivy.uix.image import Image
 
 import uuid, os
+from kivy.metrics import dp, sp
 
 import math
 
@@ -25,26 +26,6 @@ def calculate_angle(source, target):
 class Tour(Widget):
     color = ListProperty([1, 1, 1, 1])  # Par défaut blanc
     dragging = False
-
-    def __init__(self, tour_name, size, color=[1, 1, 1, 1], **kwargs):  # tour_type est l'index de la tour dans reglages_tours.py
-        super().__init__(**kwargs)
-        self.id = str(uuid.uuid4())  # Ajoutez cet identifiant unique
-        self.register_event_type('on_touch_up')
-        self.x_button = None
-
-       
-
-    def rotate_to_target(self, target):
-        angle = calculate_angle(self.center, target.center)
-        self.canvas.ask_update()
-        self.canvas.clear()
-        with self.canvas:
-            Color(*self.color)
-            self.rect = Rectangle(texture=self.texture, pos=self.pos, size=self.size, rotation=angle)
-
-    def update(self, dt):
-        if self.target:
-            self.rotate_to_target(self.target)
 
     def __init__(self, tour_name, size, color=[1, 1, 1, 1], **kwargs):  # tour_type est l'index de la tour dans reglages_tours.py
         super().__init__(**kwargs)
@@ -69,7 +50,10 @@ class Tour(Widget):
         self.name = config["nom"]
         self.range = config["range"]
         self.attack_speed = config["temps_entre_attaque"]
-        self.damage = config["degats_physiques"]  # ou combinez les dégâts physiques et magiques si nécessaire
+        self.degats_physiques = config["degats_physiques"]  # ou combinez les dégâts physiques et magiques si nécessaire
+        self.degats_magiques = config["degats_magiques"]
+
+
         self.img_directory = "tower_images/"
         self.projectile_speed = 10
         Clock.schedule_interval(self.attack, self.attack_speed)
@@ -92,7 +76,6 @@ class Tour(Widget):
 
         self.range_circle = None
 
-
     def update_graphics_pos(self, instance, value):
         self.bg.pos = value
 
@@ -110,7 +93,6 @@ class Tour(Widget):
         self.bg.pos = self.pos
         self.bg.size = self.size
         
-
     def attack(self, *args):
         #print('Attack function called. Tower active:', self.active)
         # Vérifiez que self.parent existe
@@ -134,11 +116,18 @@ class Tour(Widget):
             if closest_monster.x != 0 or closest_monster.y != 0:
                 self.animate_attack()
                 # Créez un projectile
-                projectile = Projectile(source=self, target=closest_monster, damage=self.damage, speed=self.projectile_speed, proj_col=self.proj_col)
-                print(f"Projectile created with speed: {projectile.speed}")  # Pour le débogage
+
+                print(self.name)
+
+                if self.name == "Ice":
+                    projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                else:
+                    projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                
+
+                #print(f"Projectile created with speed: {projectile.speed}")  # Pour le débogage
                 #print('Projectile created and added to parent.', self, dt)
                 self.parent.add_widget(projectile)
-
 
     def distance(self, p1, p2):
         return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
@@ -147,12 +136,26 @@ class Tour(Widget):
         closest_monster = None
         closest_distance = float('inf')
 
+
         for child in self.parent.children:
-            
+ 
             if isinstance(child, Monstre):
                 
+                #print("################################")
+                #print('demande de calcul de distance :')
+                #print("self.center",self.center)
+                #print("child.center",child.center)
                 distance = self.distance(self.center, child.center)
-                if distance < closest_distance and distance <= self.range:
+
+                #print('monstre :', child)
+                #print('distance :',distance)
+                #print('closest_distance :',closest_distance)
+                #print('self.range :',self.range)
+
+                #print('dp(80) = ', dp(80))
+
+
+                if distance < closest_distance and dp(distance) <= dp(self.range):
                     #print("debug",child.pos, child.x, child.y)
                     closest_distance = distance
                     closest_monster = child
@@ -160,19 +163,10 @@ class Tour(Widget):
         #print('Closest monster found:', closest_monster)
         return closest_monster
         
-
-
     def on_touch_up(self, touch):
-        #print("on touch up called")
-        #print('is drag?:', self.dragged)
         if not self.active:
-            #print("not active")
             return super().on_touch_up(touch)
-        #print(f"on_touch_up called for Tour with ID: {self.id}")
-        # Vérifiez si le toucher est à l'intérieur de la zone de la tour
-        #print("on_touch_up called")  # Pour vérifier si la méthode est appelée
-        #print(self.collide_point(*touch.pos))  # Pour vérifier la détection du toucher à l'intérieur de la tour
-        #print(self.dragged)  # Pour vérifier la valeur de l'attribut dragged
+
         if self.collide_point(*touch.pos) and self.dragged:
             # Affichez les boutons X et UP
             self.show_buttons()
@@ -224,8 +218,6 @@ class Tour(Widget):
                 self.del_button.bind(on_release=self.hidden_buttons_tour)
                 self.add_widget(self.del_button)
 
-            
-
     def remove_tour(self, instance):
         # Stockez une référence à l'objet parent
         parent_ref = self.parent
@@ -248,7 +240,6 @@ class Tour(Widget):
             parent_ref.coins += refund_amount
             parent_ref.pieces_label.text = str(f'Pièces: {parent_ref.coins}')
 
-
     def upgrade_tour(self, instance):
         """Améliore les attributs de la tour en fonction des valeurs dans ameliorations_tours.py."""
         # Vérifiez si d'autres améliorations sont disponibles
@@ -256,10 +247,12 @@ class Tour(Widget):
             upgrade_data = ameliorations[self.name][self.niveau_amelioration]
         except Exception as e:
             print("Upgrade de cette tour non defini:", e)
+            self.hidden_buttons_tour(instance)
             return
         
         if self.parent.coins < upgrade_data["cout_amelioration"]:
             print('pas assez argent')
+            self.hidden_buttons_tour(instance)
             return
 
 
@@ -283,9 +276,15 @@ class Tour(Widget):
             self.del_button.parent.remove_widget(self.del_button)
             self.del_button = None
 
+            new_image_name = f"tower_images/tower_{self.name}_{self.niveau_amelioration}.png"
+
+            #self.source = new_image_name  # Mettez à jour l'attribut source avec le nouveau nom
+            self.tower_image.source = new_image_name
+            #print(self.source)
+
+
         else:
             print(f"La tour de type {self.name} est déjà au niveau maximal d'amélioration.")
-
 
     def hidden_buttons_tour(self, instance):
         self.x_button.parent.remove_widget(self.x_button)
@@ -295,13 +294,22 @@ class Tour(Widget):
         self.del_button.parent.remove_widget(self.del_button)
         self.del_button = None
 
-
     def animate_attack(self):
         """Change l'image de la tour pour montrer l'animation d'attaque."""
-        self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png")
+        if self.niveau_amelioration > 0:
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
+            self.tower_image.opacity = 0.5
+        else:
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png") 
+
         # Programme la remise à l'état normal après 0,5 seconde
         Clock.schedule_once(self.reset_image, 0.5)
 
     def reset_image(self, *args):
-        """Remet l'image de la tour à son état normal."""
-        self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}.png")
+        """Remet l'image de la tour à son état normal en fonction du niveau d'amélioration."""
+        if self.niveau_amelioration > 0:
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
+            self.tower_image.opacity = 1
+        else:
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png") 
+
