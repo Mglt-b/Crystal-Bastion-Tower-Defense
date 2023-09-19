@@ -8,7 +8,7 @@ from kivy.graphics import Rectangle, Color, Line, Ellipse
 from kivy.uix.button import Button
 from kivy.metrics import dp, sp
 
-from niveau import niveaux, types_decor, types_sol
+from niveau import niveaux, types_decor
 from monstres import Monstre
 from tour import Tour
 from kivy.clock import Clock
@@ -57,7 +57,7 @@ class TourSelectionZone(BoxLayout):
 
         # Ajout de l'arrière-plan
         with self.canvas.before:
-            Color(0.2, 0.2, 0.2, .5)  # Gris foncé pour l'arrière-plan
+            Color(0.2, 0.2, 0.2, 1)  # Gris foncé pour l'arrière-plan
             self.bg = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self.update_bg, size=self.update_bg)
 
@@ -89,6 +89,7 @@ class TourSelectionZone(BoxLayout):
 class MapZone(Widget):
     tours = ListProperty([])
     def __init__(self, niveau, **kwargs):
+
         #print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
         self.lives = super().__init__(**kwargs)
         self.niveau = niveau
@@ -96,26 +97,26 @@ class MapZone(Widget):
         self.dragging_tour = None  # Pour suivre la tour que nous déplaçons
         self.tower_drag_start_pos = None  # Pour sauvegarder la position d'origine de la tour
         
-        with self.canvas:
+        with self.canvas.after:
             Color(1, 0, 0, 0)  # Rouge pour le chemin
             self.path = Line(points=[], width=0)
-        
+
         # Mettez à jour self.path.points après avoir dessiné les rectangles
         adjusted_path = [(p[0]*self.width, p[1]*self.height) for p in self.niveau["path"]]
         self.path.points = self.flatten_path(adjusted_path)
 
-        self.coins = 200
+        self.coins = 150
         
-        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(10), Window.height - dp(30)), color="red")
+        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(30), Window.height - dp(45)), color="red")
         self.pieces_label.id = 'pieces_label'  # Ajout d'un ID
         self.add_widget(self.pieces_label)
 
+
         self.lives = 20  # Initialize with 20 lives
-        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(30)), color="blue")
+        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(45)), color="blue")
         self.add_widget(self.lives_label)
         #print("Fin de l'initialisation de MapZone")   # Ajouté pour le débogage
 
-        self.bind(size=self.update_labels_position)
 
         self.scheduled_monster_events = []  # Ajoutez ceci pour stocker les événements programmés
 
@@ -123,6 +124,10 @@ class MapZone(Widget):
 
         # Ajoutez ces deux lignes pour initialiser les compteurs de monstres
         self.current_monsters = 0  # Nombre de monstres actuellement dans le jeu
+
+    def _update_rect(self, instance, value):
+        self.rect.size = instance.size
+        self.rect.pos = instance.pos
 
     def calculate_distance(self,p1, p2):
         """Calculate the distance between two points."""
@@ -148,39 +153,49 @@ class MapZone(Widget):
             decor_widget = Image(source=image_path, size=size, pos=position_pixel)
             self.add_widget(decor_widget)
 
-
-        # Instanciation des éléments du sol
-        for sol_item in self.niveau["sol"]:
-            sol_type = sol_item["type"]
-            image_path = types_sol[sol_type]["image"]
-            size = sol_item.get("size", types_sol[sol_type]["size"])  # Utilisez la taille fournie ou la taille par défaut
-            
-            # Convertir les proportions en coordonnées de pixels
-            x_pixel = sol_item["position"][0] * self.width
-            y_pixel = sol_item["position"][1] * self.height
-
-            position_pixel = (x_pixel, y_pixel)
-            
-            sol_widget = Image(source=image_path, size=size, pos=position_pixel)
-            self.add_widget(sol_widget)
-        
         self.draw_texture()
-
-    def update_labels_position(self, *args):
-        self.pieces_label.pos = (dp(10), self.height)
-        self.lives_label.pos = (dp(150), self.height)
         
     def on_size(self, *args):
         adjusted_path = [(p[0]*self.width, p[1]*self.height) for p in self.niveau["path"]]
         self.path.points = self.flatten_path(adjusted_path)
         
     def draw_texture(self):
-        self.texture = Image(source='decor_image/wooden.png').texture
+        
+        #lecture du sol dans niveau
+        for sol_item in self.niveau["sol"]:
+            sol_type = sol_item["type"]
+            sol_size = sol_item["size"]
+
+        if sol_size == 1 :
+            sol_size_final = (1,1)
+        else:
+            sol_size_final = (Window.width / sol_size,Window.height/sol_size)
+
+        #defini la texture de la map
+        self.texture_sol = Image(source=sol_type).texture
+        self.texture_sol.wrap = 'repeat'
+
+
+        #dessine la texture de la map
+        with self.canvas.before:   
+            # Dessinez le rectangle texturé
+            PushMatrix()
+            self.texture_sol.uvsize = sol_size_final
+            Rectangle(pos=(0, 0), size=(Window.width, Window.height), texture=self.texture_sol)
+            PopMatrix()
+
+        #lecture du sol dans niveau
+        for chemin_item in self.niveau["chemin"]:
+            chemin_type = chemin_item["type"]
+
+        #defini la texture du chemin
+        self.texture = Image(source=chemin_type).texture
         self.line_width = dp(20)
-        print("self.path_points:", self.path_points)
+        self.texture.wrap = 'repeat'
+
         
         with self.canvas.before:
-            Color(1, 1, 1, 1)  # Couleur blanche pour bien voir le rectangle
+            #Color(1, 1, 1, 1)  # Couleur blanche pour bien voir le rectangle
             for i in range(len(self.path_points) - 1):
                 start_point = (self.path_points[i][0] * self.width, self.path_points[i][1] * self.height)
                 end_point = (self.path_points[i + 1][0] * self.width, self.path_points[i + 1][1] * self.height)
@@ -197,8 +212,15 @@ class MapZone(Widget):
                 PushMatrix()
                 Translate(rectangle_position[0], rectangle_position[1])
                 Rotate(angle=angle, origin=(distance / 2, self.line_width / 2))
+                self.texture.uvsize = (distance / dp(20),1)
                 Rectangle(pos=(0, 0), size=(distance, self.line_width), texture=self.texture)
                 PopMatrix()
+
+        #bg avec compteurs
+        with self.pieces_label.canvas.before:
+            Color(0.2, 0.2, 0.2, 1)
+            Rectangle(pos=(0, Window.height-dp(40)), size=(Window.width, Window.height))
+        self.pieces_label.bind(size=self._update_rect, pos=self._update_rect)
 
     def flatten_path(self, path):
         """Transforme une liste de points (x, y) en une liste plate pour Kivy."""
@@ -446,7 +468,7 @@ class MainLayout(BoxLayout):
         selected_niveau = niveau
         
         # Ajout de la zone de la carte avec le niveau sélectionné
-        self.map_zone = MapZone(niveau,size_hint=(1, 0.8))  # Initialise MapZone avec le niveau choisi
+        self.map_zone = MapZone(niveau,size_hint=(1, 1))  # Initialise MapZone avec le niveau choisi
         
         # Associez map_zone à l'ID 'map_zone'
         self.ids['map_zone'] = self.map_zone

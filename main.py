@@ -19,9 +19,6 @@ from kivy.metrics import dp, sp
 from functools import partial
 
 
-
-
-
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

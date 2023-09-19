@@ -1,4 +1,5 @@
 import random
+from kivy.metrics import dp, sp
 
 def generate_random_path(grid_size, path_length, min_turns):
     """Generate a random path on a grid of given size."""
@@ -65,29 +66,23 @@ def generate_random_path(grid_size, path_length, min_turns):
     return path
 #random generate : generate_random_path(8, 100000, 5)
 
-def generate_sol(positions):
-    """Génère une liste 'sol' basée sur les positions fournies."""
-    return [{"type": "plancher", "position": position} for position in positions]
 
 types_decor = {
-    "arbre": {"image": "decor_image/arbre_image_1.png", "size": (40, 40)},
-    "rocher": {"image": "decor_image/rocher_image_1.png", "size": (40, 40)},
+    "arbre": {"image": "decors_images/arbre_image_1.png", "size": (dp(20), dp(20))},
+    "rocher": {"image": "decors_images/rocher_image_1.png", "size": (dp(20), dp(20))},
+    "cristal": {"image": "decors_images/cristal_image.png", "size": (dp(30), dp(30))},
     # ... Ajoutez d'autres types de décor ici
 }
 
-types_sol = {
-    "plancher": {"image": "decor_image/wooden.png", "size": (40, 40)},
-    # ... Ajoutez d'autres types de décor ici
-}
 
 path_level_1 = [(0.0, 0.6), (1, 0.6)]
 
 
-path_level_2 = [(0.0, 0.6), (0.125, 0.6), (0.3, 0.6),
-                (0.7, 0.6), (0.7, 0.4), (0.2, 0.4),
-                (0.1, 0.2),(0.8, 0.2),
-                (0.8, 0.8),
-                (0, 0.9)] #fin
+path_level_2 = [(0.0, 0.8), (0.125, 0.8), (0.3, 0.8),
+                (0.5, 0.8), (0.5, 0.6), (0.2, 0.6),
+                (0.1, 0.4),(0.8, 0.4),
+                (0.8, 1),
+                (0, 1)] #fin
 
 path_level_3 = [(0.0, 0.6), (0.0, 0.7), (0.1, 0.7), (0.1, 0.8), (0.2, 0.8), (0.3, 0.8), (0.3, 0.9), (0.4, 0.9), (0.5, 0.9), (0.6, 0.9), (0, 0.9)]
 
@@ -118,7 +113,7 @@ path_level_10 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25,
 
 niveaux = [
     {
-        "path": path_level_1 ,
+        "path": path_level_1,
         "monsters": [
             {"type": "normal", "count": 1},
             {"type": "rapide", "count": 2},
@@ -126,8 +121,10 @@ niveaux = [
             {"type": "tank", "count": 1},
             {"type": "rapide", "count": 12},
                     ],
-        "decor": [],
-        "sol": [],
+        "decor": [{"type": "cristal","position": (0.3,0.5)}],
+        "sol": [{"type": "decors_images/wooden.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_2,
@@ -136,7 +133,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_3,
@@ -145,7 +144,9 @@ niveaux = [
             {"type": "rapide", "count": 0}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_3.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_4,
@@ -154,7 +155,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_4.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_5,
@@ -163,7 +166,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_5.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_6,
@@ -172,7 +177,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_7,
@@ -181,7 +188,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
         "path": path_level_8,
@@ -190,7 +199,9 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [],
+        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     # ... Ajoutez d'autres niveaux ici
 ]

@@ -300,16 +300,20 @@ class Tour(Widget):
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
             self.tower_image.opacity = 0.5
         else:
+            print('anim att')
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png") 
 
         # Programme la remise à l'état normal après 0,5 seconde
-        Clock.schedule_once(self.reset_image, 0.5)
+        Clock.schedule_once(self.reset_image, 0.2)
 
     def reset_image(self, *args):
         """Remet l'image de la tour à son état normal en fonction du niveau d'amélioration."""
+        print("lvl ammelio",self.niveau_amelioration)
         if self.niveau_amelioration > 0:
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
             self.tower_image.opacity = 1
         else:
-            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png") 
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}.png") 
+            self.tower_image.opacity = 1
+            print(f"tower_{self.name}.png")
 

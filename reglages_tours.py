@@ -10,7 +10,7 @@ tours = [
         "temps_entre_attaque": .7,  # en secondes
         "taille": (dp(50), dp(50)),  # Largeur x Hauteur
         "couleur": [1, 0.5, 0.5, 1],
-        "range": dp(150),
+        "range": dp(115),
         "projectile_color": [1, 0.5, 0.5, 1],
         'cost': 50
     },
@@ -43,7 +43,7 @@ tours = [
         "temps_entre_attaque": 1,  # ou un autre nombre approprié
         "taille": (dp(50), dp(50)),
         "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
-        "range": dp(80),  # ou un autre nombre approprié
+        "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60  # ou un autre nombre approprié
     }

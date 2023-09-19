@@ -30,6 +30,13 @@ class Coin(Widget):
             Color(1, 0.8, 0)  # Gold color for the coin
             self.ellipse = Ellipse(pos=self.pos, size=(dp(10), dp(17)))
 
+
+        self.bind(pos=self.update_graphics_pos)
+        self.update_graphics_pos()
+
+    def update_graphics_pos(self, *args):
+        self.ellipse.pos = self.pos
+
 class Monstre(Widget):
     coin_value = NumericProperty(0)
     angle = NumericProperty(0)
@@ -371,17 +378,24 @@ class Monstre(Widget):
         end_pos = (map_zone.pieces_label.x + map_zone.pieces_label.width/2, 
                 map_zone.pieces_label.y + map_zone.pieces_label.height/2)
 
-        # Créez une animation pour déplacer la pièce vers le label "Pièces"
-        animation = Animation(center=end_pos, duration=.5)
+        def on_animation_progress(animation, coin_instance, progression):
+            print(coin_instance, f"Progression: {progression}, Position: {coin_instance.pos}")
 
         # À la fin de l'animation, supprimez la pièce de map_zone et mettez à jour le nombre de pièces
         def on_animation_complete(animation, coin_instance):
             map_zone.coins += coin.value
             map_zone.pieces_label.text = f"Pièces: {map_zone.coins}"
             map_zone.remove_widget(coin_instance)
+            print("Animation complete!")
 
+        # Créez une animation pour déplacer la pièce vers le label "Pièces"
+        animation = Animation(center=end_pos, duration=0.25)
+        print("animate coin from :", self.pos, "to :",end_pos)
+        animation.bind(on_progress=on_animation_progress)
         animation.bind(on_complete=on_animation_complete)
         animation.start(coin)
+        
+
 
     def finalize_coin_animation(self, coin, map_zone):
         # Mettre à jour le nombre de pièces
