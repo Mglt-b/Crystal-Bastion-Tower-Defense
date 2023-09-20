@@ -261,10 +261,6 @@ class Monstre(Widget):
                 print(child)
                 map_zone.remove_widget(child)
 
-            #supprime les monstres programmés
-            for event in map_zone.scheduled_monster_events:
-                Clock.unschedule(event)
-                print("unshedule : ", event)
             map_zone.scheduled_monster_events.clear()  # videz la liste
 
             #supprime le canvas
@@ -277,7 +273,7 @@ class Monstre(Widget):
             #reset popup
             app = App.get_running_app()
             app.game_over_popup_shown = False
-            app.game_over_popup_win = False
+            app.game_win_popup_shown = False
             
         popup.bind(on_dismiss=on_popup_dismiss)
         
@@ -297,7 +293,7 @@ class Monstre(Widget):
     def game_win(self):
 
         app = App.get_running_app()
-        
+        print("app.game_win_popup_shown", app.game_win_popup_shown)
         if not app.game_win_popup_shown:
             app.game_win_popup_shown = True
             self.show_win_popup()
@@ -342,8 +338,10 @@ class Monstre(Widget):
 
             map_zone.current_monsters -= 1
             print("map_zone.current_monsters", map_zone.current_monsters)
+            map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
             
-            if map_zone.current_monsters == 0:
+            if map_zone.current_monsters == 0 or map_zone.label_current_monsters.text == "0":
+                print("game_win called")
                 self.game_win()
             
     def on_monster_death(self, *args):
@@ -395,8 +393,6 @@ class Monstre(Widget):
         animation.bind(on_complete=on_animation_complete)
         animation.start(coin)
         
-
-
     def finalize_coin_animation(self, coin, map_zone):
         # Mettre à jour le nombre de pièces
         map_zone.coins += coin.value

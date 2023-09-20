@@ -124,7 +124,7 @@ niveaux = [
         "decor": [{"type": "cristal","position": (0.3,0.5)}],
         "sol": [{"type": "decors_images/wooden.png",
                 "size": 1}],
-        "chemin": [{"type": "decors_images/futur_sol.png"}],
+        "chemin": [{"type": "decors_images/sols/futuriste_2.png"}],
     },
     {
         "path": path_level_2,
@@ -177,7 +177,7 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+        "sol": [{"type": "decors_images/sols/futuriste_6.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
@@ -188,7 +188,7 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+        "sol": [{"type": "decors_images/sols/futuriste_7.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
@@ -199,7 +199,7 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [{"type": "decors_images/sols/futuriste_2.png",
+        "sol": [{"type": "decors_images/sols/futuriste_8.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },

@@ -51,7 +51,7 @@ class TourSelectionZone(BoxLayout):
 
         self.orientation = 'horizontal'
         self.size_hint_y = None
-        self.height = dp(100)  # Hauteur fixe pour la zone de sélection des tours
+        self.height = dp(80)  # Hauteur fixe pour la zone de sélection des tours
         self.spacing=dp(30)
         self.padding=[dp(10),0,0,0]
 
@@ -105,25 +105,29 @@ class MapZone(Widget):
         adjusted_path = [(p[0]*self.width, p[1]*self.height) for p in self.niveau["path"]]
         self.path.points = self.flatten_path(adjusted_path)
 
+        #section pieces du joueur
         self.coins = 150
-        
-        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(30), Window.height - dp(45)), color="red")
+        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(30), Window.height - dp(40)), color="red", font_size = dp(12))
         self.pieces_label.id = 'pieces_label'  # Ajout d'un ID
         self.add_widget(self.pieces_label)
 
-
-        self.lives = 20  # Initialize with 20 lives
-        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(45)), color="blue")
+        #compteur de vie du joueur
+        self.lives = 20  # Initialize with 20 lisves
+        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(40)), color="blue", font_size = dp(12))
         self.add_widget(self.lives_label)
-        #print("Fin de l'initialisation de MapZone")   # Ajouté pour le débogage
-
 
         self.scheduled_monster_events = []  # Ajoutez ceci pour stocker les événements programmés
+        # Ajoutez ces deux lignes pour initialiser les compteurs de monstres
+
+
+        #compteur de vie du joueur
+        self.current_monsters = 0  # Nombre de monstres actuellement dans le jeu
+        self.label_current_monsters = Label(text=f'Mobs: {self.current_monsters}', pos=(dp(270), Window.height - dp(40)), color="green", font_size = dp(12))
+        self.add_widget(self.label_current_monsters)
 
         Clock.schedule_once(self.add_decor, .1)
 
-        # Ajoutez ces deux lignes pour initialiser les compteurs de monstres
-        self.current_monsters = 0  # Nombre de monstres actuellement dans le jeu
+
 
     def _update_rect(self, instance, value):
         self.rect.size = instance.size
@@ -167,6 +171,7 @@ class MapZone(Widget):
             sol_size = sol_item["size"]
 
         if sol_size == 1 :
+            
             sol_size_final = (1,1)
         else:
             sol_size_final = (Window.width / sol_size,Window.height/sol_size)
@@ -253,7 +258,8 @@ class MapZone(Widget):
         app.active_monsters.append(self)
         monster.bind(on_monster_death=self.add_coins)
         self.add_widget(monster)
-        self.current_monsters += 1 
+        self.current_monsters += 1
+        self.label_current_monsters.text=f'Mobs: {self.current_monsters}'
         print("'self.current_monsters' : ", self.current_monsters)
 
     def on_touch_down(self, touch):
