@@ -22,6 +22,8 @@ from kivy.animation import Animation
 from kivy.graphics import Rotate
 from kivy.graphics import PushMatrix, PopMatrix
 
+from kivy.storage.jsonstore import JsonStore
+
 class Coin(Widget):
     def __init__(self,value, **kwargs):
         super().__init__(**kwargs)
@@ -274,6 +276,11 @@ class Monstre(Widget):
             app = App.get_running_app()
             app.game_over_popup_shown = False
             app.game_win_popup_shown = False
+
+            #refresh levels :
+            root_widget = App.get_running_app().root
+            menu_screen = root_widget.get_screen('menu')
+            menu_screen.refresh_levels()
             
         popup.bind(on_dismiss=on_popup_dismiss)
         
@@ -298,6 +305,18 @@ class Monstre(Widget):
             app.game_win_popup_shown = True
             self.show_win_popup()
             print("game win")
+
+            # Utilisez JsonStore pour enregistrer la progression
+            store = JsonStore(os.path.join('db', 'progress.json'))
+
+            # Supposons que vous ayez un identifiant ou un nom pour chaque niveau
+            root_widget = App.get_running_app().root
+            game_screen = root_widget.get_screen('game')
+            map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
+            level_id = str(map_zone.actual_level)  # Convertir en chaîne pour utiliser comme clé; remplacez par la logique appropriée pour obtenir l'ID du niveau
+            store.put(level_id, completed=True)
+            
+ 
 
     def take_damage(self, damage_physique, damage_magique):
         # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique

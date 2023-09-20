@@ -113,6 +113,8 @@ path_level_10 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25,
 
 niveaux = [
     {
+        "world": "Monde 1",
+        "level": 1,
         "path": path_level_1,
         "monsters": [
             {"type": "normal", "count": 1},
@@ -127,6 +129,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/sols/futuriste_2.png"}],
     },
     {
+        "world": "Monde 1",
+        "level": 2,
         "path": path_level_2,
         "monsters": [
             {"type": "normal", "count": 10},
@@ -138,6 +142,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 1",
+        "level": 3,
         "path": path_level_3,
         "monsters": [
             {"type": "normal", "count": 1},
@@ -149,6 +155,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 1",
+        "level": 4,
         "path": path_level_4,
         "monsters": [
             {"type": "normal", "count": 10},
@@ -160,6 +168,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 2",
+        "level": 5,
         "path": path_level_5,
         "monsters": [
             {"type": "normal", "count": 10},
@@ -171,6 +181,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 2",
+        "level": 6,
         "path": path_level_6,
         "monsters": [
             {"type": "normal", "count": 10},
@@ -182,6 +194,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 2",
+        "level": 7,
         "path": path_level_7,
         "monsters": [
             {"type": "normal", "count": 10},
@@ -193,6 +207,8 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
+        "world": "Monde 2",
+        "level": 8,
         "path": path_level_8,
         "monsters": [
             {"type": "normal", "count": 10},

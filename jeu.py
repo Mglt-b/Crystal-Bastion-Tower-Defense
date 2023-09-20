@@ -93,6 +93,8 @@ class MapZone(Widget):
         #print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
         self.lives = super().__init__(**kwargs)
         self.niveau = niveau
+        self.actual_level = niveau["level"]
+        print("self.actual_level",self.actual_level)
         self.path_points = []
         self.dragging_tour = None  # Pour suivre la tour que nous déplaçons
         self.tower_drag_start_pos = None  # Pour sauvegarder la position d'origine de la tour

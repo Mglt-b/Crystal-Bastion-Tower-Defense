@@ -56,7 +56,8 @@ class Projectile(Widget):
         # Vérification si le projectile a atteint la cible
         if Vector(self.center).distance(self.target.center) < dp(7):
             self.target.take_damage(self.degats_physiques, self.degats_magiques)
-            self.parent.remove_widget(self)
+            if self.parent:
+                self.parent.remove_widget(self)
             Clock.unschedule(self.move)
 
 
