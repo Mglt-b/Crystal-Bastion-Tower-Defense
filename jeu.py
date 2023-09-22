@@ -33,7 +33,7 @@ from kivy.uix.image import Image
 from kivy.uix.popup import Popup
 import math
 from kivy.graphics.context_instructions import PushMatrix, PopMatrix, Translate, Rotate
-
+from kivy.storage.jsonstore import JsonStore
 
 # Pour que l'application soit toujours en mode portrait
 
@@ -55,6 +55,8 @@ class TourSelectionZone(BoxLayout):
         self.spacing=dp(30)
         self.padding=[dp(10),0,0,0]
 
+        store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
+
         # Ajout de l'arrière-plan
         with self.canvas.before:
             Color(0.2, 0.2, 0.2, 1)  # Gris foncé pour l'arrière-plan
@@ -63,6 +65,8 @@ class TourSelectionZone(BoxLayout):
 
         # Ajout de toutes les tours disponibles
         for tour_config in tours:
+            if not store_towers.exists(tour_config["nom"]) and tour_config["nom"] != "Basique":  # Si la tour n'a pas été achetée, on passe à la suivante
+                continue
             # Création d'un layout vertical pour empiler le label et la tour
             tour_layout = BoxLayout(orientation='vertical', size_hint=(None, 1), width=tour_config["taille"][0], spacing=dp(5))
             
@@ -89,6 +93,8 @@ class TourSelectionZone(BoxLayout):
 class MapZone(Widget):
     tours = ListProperty([])
     def __init__(self, niveau, **kwargs):
+
+        self.programmed_monster = 0 #compteur monstre programmés pour la victoire
 
         #print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
         self.lives = super().__init__(**kwargs)
@@ -238,6 +244,7 @@ class MapZone(Widget):
         self.path_points = niveau["path"]
 
         delay = 0
+        delta_delay = .1
         path = niveau["path"]
         
         for monster_info in niveau["monsters"]:
@@ -246,7 +253,11 @@ class MapZone(Widget):
                 event = Clock.schedule_once(partial(self.add_monster, monster_info=monster_info, path=path), delay)
                 #print("Appel à add_monster programmé.")
                 self.scheduled_monster_events.append(event)
-                delay += 2
+                self.programmed_monster += 1
+                print("self.programmed_monster :", self.programmed_monster)
+
+                delay += random.uniform(0.1, 1.5)
+
                 # Ajoutez cette ligne pour incrémenter le compteur total de monstres lorsqu'un nouveau monstre apparaît
                              
     def add_monster(self, dt,monster_info, path):

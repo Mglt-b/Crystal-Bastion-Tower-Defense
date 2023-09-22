@@ -12,7 +12,8 @@ tours = [
         "couleur": [1, 0.5, 0.5, 1],
         "range": dp(115),
         "projectile_color": [1, 0.5, 0.5, 1],
-        'cost': 50
+        'cost': 50,
+        'cristal_cost':30    
     },
     {
         "nom": "Magique",
@@ -23,7 +24,8 @@ tours = [
         "couleur": [0, 0, 1, 1],  # Bleu
         "range": dp(100),
         "projectile_color": [0, 0, 1, 1],  # Bleu
-        'cost': 50
+        'cost': 50,
+        'cristal_cost':50   
     },
     {
         "nom": "Rapide",
@@ -34,7 +36,8 @@ tours = [
         "couleur": [0, 1, 0, 1],  # Vert
         "range": dp(100),
         "projectile_color": [0, 1, 0, 1],  # Vert
-        'cost': 50
+        'cost': 50,
+        'cristal_cost':50   
     },
     {
         "nom": "Ice",
@@ -45,7 +48,8 @@ tours = [
         "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
-        'cost': 60  # ou un autre nombre approprié
+        'cost': 60,
+        'cristal_cost':500
     }
     # Ajoutez d'autres configurations de tours ici si nécessaire
 ]
