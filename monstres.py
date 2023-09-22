@@ -172,7 +172,7 @@ class Monstre(Widget):
                     if map_zone.lives <= 0:
                         self.game_over()  # This function needs to be implemented to handle game over logic
 
-                    if map_zone.lives > 0 and map_zone.current_monsters == 0: 
+                    if map_zone.lives > 0 and map_zone.programmed_monster == 0 and map_zone.current_monsters == 0: 
                         self.game_win()  # This function needs to be implemented to handle game over logic              
 
                     self.parent.remove_widget(self)
@@ -300,24 +300,54 @@ class Monstre(Widget):
     def game_win(self):
 
         app = App.get_running_app()
-        print("app.game_win_popup_shown", app.game_win_popup_shown)
         if not app.game_win_popup_shown:
             app.game_win_popup_shown = True
             self.show_win_popup()
             print("game win")
 
             # Utilisez JsonStore pour enregistrer la progression
-            store = JsonStore(os.path.join('db', 'progress.json'))
+            progress_store = JsonStore(os.path.join('db', 'progress.json'))
+            stars_store = JsonStore(os.path.join('db', 'stars.json'))
 
             # Supposons que vous ayez un identifiant ou un nom pour chaque niveau
             root_widget = App.get_running_app().root
             game_screen = root_widget.get_screen('game')
             map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
             level_id = str(map_zone.actual_level)  # Convertir en chaîne pour utiliser comme clé; remplacez par la logique appropriée pour obtenir l'ID du niveau
-            store.put(level_id, completed=True)
             
- 
+            progress_store.put(level_id, completed=True)
+            
+            # Conditions fictives pour déterminer le nombre d'étoiles obtenues
+            stars_earned = 1
 
+            #get life points = "map_zone.lives"
+            root_widget = App.get_running_app().root
+            map_zone = root_widget.get_screen('game').map_zone  # Accédez directement à map_zone via la référence root_widget
+            
+            condition_for_3_stars = False # a coder
+
+
+            if map_zone.lives >= 15:  # terminer le niveau avec >= 15 points de vie
+                stars_earned += 1
+            if map_zone.lives == 20:  # terminer le niveau avec 20 points de vie
+                stars_earned += 1
+            
+            # Stocker le nombre d'étoiles obtenues dans le fichier JSON
+            stars_store.put(level_id, stars=stars_earned)
+
+            # Utilisez JsonStore pour vérifier si le niveau a été complété pour la première fois
+            first_complete_store = JsonStore(os.path.join('db', 'first_complete_level.json'))
+
+            if not first_complete_store.exists(level_id):  # Si le niveau n'a pas encore été complété pour la première fois
+                # Ajouter 30 cristaux à l'utilisateur
+                cristal_store = JsonStore(os.path.join('db', 'cristaux.json'))
+                current_cristal_count = cristal_store.get('count')['value']
+                cristal_store.put('count', value=current_cristal_count + 30)
+
+                # Marquer le niveau comme complété pour la première fois
+                first_complete_store.put(level_id, completed=True)
+
+            
     def take_damage(self, damage_physique, damage_magique):
         # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique
         degats_reels_physiques = damage_physique * (1 - (self.armure / (100 + self.armure)))
@@ -358,8 +388,10 @@ class Monstre(Widget):
             map_zone.current_monsters -= 1
             print("map_zone.current_monsters", map_zone.current_monsters)
             map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
+
+            map_zone.programmed_monster -= 1
             
-            if map_zone.current_monsters == 0 or map_zone.label_current_monsters.text == "0":
+            if map_zone.lives > 0 and map_zone.programmed_monster == 0 and map_zone.current_monsters == 0: 
                 print("game_win called")
                 self.game_win()
             
