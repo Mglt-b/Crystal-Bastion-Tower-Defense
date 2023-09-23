@@ -166,7 +166,10 @@ class Monstre(Widget):
                     map_zone.lives_label.text = f'Vies: {map_zone.lives}'
                     
                     map_zone.current_monsters -= 1
+                    map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
                     print("monstre fin path, retiré, count :",map_zone.current_monsters)
+
+                    map_zone.programmed_monster -= 1
 
                     print('map_zone.lives', map_zone.lives)
                     if map_zone.lives <= 0:
@@ -346,8 +349,7 @@ class Monstre(Widget):
 
                 # Marquer le niveau comme complété pour la première fois
                 first_complete_store.put(level_id, completed=True)
-
-            
+       
     def take_damage(self, damage_physique, damage_magique):
         # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique
         degats_reels_physiques = damage_physique * (1 - (self.armure / (100 + self.armure)))

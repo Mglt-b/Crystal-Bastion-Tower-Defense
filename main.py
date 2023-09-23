@@ -34,6 +34,128 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 
+from kivy.uix.checkbox import CheckBox
+from kivymd.uix.button import MDFlatButton
+
+class DeckScreen(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.worldscreen_widget = Widget()
+        self.add_widget(self.worldscreen_widget)
+
+        self.layout = MDBoxLayout(orientation='vertical', size_hint=(1, 1))
+        self.add_widget(self.layout)
+
+
+
+    def check_tower_selection(self, checkbox, value):
+        # Limiter à 4 tours cochées
+        if value and sum([cb.active for cb in self.checkboxes]) > 4:
+            checkbox.active = False
+    
+    def save_deck(self, instance):
+        # Enregistrez les tours sélectionnées dans tower_deck.json
+        selected_towers = [tower for tower, checkbox in zip(self.bought_towers, self.checkboxes) if checkbox.active]
+        deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
+        deck_store.put('selected_towers', towers=selected_towers)
+        self.return_to_world_selection(instance)
+
+    def return_to_world_selection(self, instance):
+        self.manager.current = 'worlds'
+
+    def get_cristaux(self):
+        store = JsonStore(os.path.join('db', 'cristaux.json'))
+        if not store.exists('count'):
+            store.put('count', value=0)
+        return store.get('count')['value']
+
+    def update_cristaux_label(self):
+        cristal_count = self.get_cristaux()
+        self.cristaux_label.text = str(cristal_count)
+
+    def update_counters(self):
+        # Update cristal count from JsonStore
+        # (You might want to implement the logic for this if it's not already done)
+
+        # Update stars count from JsonStore
+        stars_store = JsonStore(os.path.join('db', 'stars.json'))
+        total_stars = sum([stars_store.get(key)["stars"] for key in stars_store.keys()])
+
+        self.stars_label.text = str(total_stars)
+
+    def on_enter(self, *args):
+        self.layout.clear_widgets()
+
+        # Top bar for counters
+        top_bar = MDBoxLayout(orientation='horizontal', size_hint=(.5, None), height=dp(50), spacing=dp(5))
+        self.layout.add_widget(top_bar)  # Assurez-vous de l'ajouter en premier pour qu'il soit en haut
+        
+        # Cristaux counter
+        crystal_icon = MDIconButton(icon="diamond-stone", font_size=dp(24), text_color="blue", theme_text_color="Custom")
+        self.cristaux_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
+        crystal_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
+        crystal_layout.add_widget(crystal_icon)
+        crystal_layout.add_widget(self.cristaux_label)
+        top_bar.add_widget(crystal_layout)
+
+        # Stars counter
+        star_icon = MDIconButton(icon="star", font_size=dp(24), text_color=(1, 0.84, 0, 1), theme_text_color="Custom")
+        self.stars_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
+        star_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
+
+        star_layout.add_widget(star_icon)
+        star_layout.add_widget(self.stars_label)
+        top_bar.add_widget(star_layout)
+
+
+        self.update_cristaux_label()
+        self.update_counters()
+
+
+        # Liste des tours achetées
+        bought_towers_store = JsonStore(os.path.join('db', 'tower_buy.json'))
+        self.bought_towers = []
+
+        self.bought_towers.append("Basique")
+        self.bought_towers2 = [key for key in bought_towers_store.keys() if bought_towers_store.get(key).get("bought")]
+
+        self.bought_towers = self.bought_towers + self.bought_towers2
+
+        # Créer une liste pour stocker les cases à cocher
+        self.checkboxes = []
+        
+        # Créer une section pour la sélection des tours
+        self.tower_selection_layout = BoxLayout(orientation='vertical', spacing=dp(10))
+        for tower in self.bought_towers:
+            tower_layout = BoxLayout(orientation='horizontal', spacing=dp(10))
+            checkbox = CheckBox(size_hint_x=None, width=dp(50))
+            checkbox.bind(active=self.check_tower_selection)
+            tower_label = Label(text=tower, size_hint_x=0.8, color=(0, 0, 0, 1))  # Texte en noir
+            # Cocher la case si la tour est déjà cochée dans le fichier JSON
+            if self.is_tower_checked(tower):
+                checkbox.active = True
+                
+            tower_layout.add_widget(checkbox)
+            tower_layout.add_widget(tower_label)
+            self.checkboxes.append(checkbox)
+            self.tower_selection_layout.add_widget(tower_layout)
+        self.layout.add_widget(self.tower_selection_layout)
+        
+        # Bouton pour sauvegarder la sélection
+        save_button = MDRaisedButton(text="Sauvegarder", on_release=self.save_deck)
+        self.layout.add_widget(save_button)
+
+    def is_tower_checked(self, tower_name):
+        """Return if the given tower is checked in the JSON."""
+        deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
+        if not deck_store.exists('selected_towers'):
+            return False
+        selected_towers = deck_store.get('selected_towers').get('towers', [])
+        return tower_name in selected_towers
+
+
+
 class WorldScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -49,7 +171,7 @@ class WorldScreen(MDScreen):
         layout.add_widget(top_bar)  # Assurez-vous de l'ajouter en premier pour qu'il soit en haut
         
         # Cristaux counter
-        crystal_icon = MDIconButton(icon="diamond-stone", font_size=dp(24))
+        crystal_icon = MDIconButton(icon="diamond-stone", font_size=dp(24), text_color="blue", theme_text_color="Custom")
         self.cristaux_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
         crystal_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
         crystal_layout.add_widget(crystal_icon)
@@ -57,7 +179,7 @@ class WorldScreen(MDScreen):
         top_bar.add_widget(crystal_layout)
 
         # Stars counter
-        star_icon = MDIconButton(icon="star", font_size=dp(24))
+        star_icon = MDIconButton(icon="star", font_size=dp(24), text_color=(1, 0.84, 0, 1), theme_text_color="Custom")
         self.stars_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
         star_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
 
@@ -69,8 +191,8 @@ class WorldScreen(MDScreen):
         top_bar.add_widget(tour_shop)
         tour_shop.bind(on_release=self.open_tower_shop)
 
-        quit_button = MDRaisedButton(text="Exit", on_release=App.get_running_app().stop, size_hint_x = .4)
-        top_bar.add_widget(quit_button)
+        deck_button = MDRaisedButton(text="Deck", on_release=self.open_deck, size_hint_x = .4)
+        top_bar.add_widget(deck_button)
 
 
 
@@ -94,6 +216,9 @@ class WorldScreen(MDScreen):
     def on_enter(self, *args):
         self.update_cristaux_label()
         self.update_counters()
+
+    def open_deck(self,instance):
+        self.manager.current = 'deck'
 
     def open_tower_shop(self,instance):
         self.manager.current = 'tower_shop'
@@ -369,6 +494,7 @@ class MenuApp(MDApp):
         sm.add_widget(MainMenu(name='menu'))
         sm.add_widget(GameScreen(name='game'))
         sm.add_widget(TowerShopScreen(name='tower_shop'))
+        sm.add_widget(DeckScreen(name='deck'))
 
         self.scheduled_functions = []
         self.active_monsters = []
