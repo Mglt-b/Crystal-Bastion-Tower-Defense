@@ -52,10 +52,11 @@ class TourSelectionZone(BoxLayout):
         self.orientation = 'horizontal'
         self.size_hint_y = None
         self.height = dp(80)  # Hauteur fixe pour la zone de sélection des tours
-        self.spacing=dp(30)
-        self.padding=[dp(10),0,0,0]
+        self.spacing = dp(30)
+        self.padding = [dp(10), 0, 0, 0]
 
-        store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
+        deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
+        selected_towers = deck_store.get('selected_towers')['towers']
 
         # Ajout de l'arrière-plan
         with self.canvas.before:
@@ -63,17 +64,17 @@ class TourSelectionZone(BoxLayout):
             self.bg = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self.update_bg, size=self.update_bg)
 
-        # Ajout de toutes les tours disponibles
+        # Ajout des tours sélectionnées
         for tour_config in tours:
-            if not store_towers.exists(tour_config["nom"]) and tour_config["nom"] != "Basique":  # Si la tour n'a pas été achetée, on passe à la suivante
+            if tour_config["nom"] not in selected_towers :  # Si la tour n'a pas été sélectionnée et ce n'est pas la tour "Basique"
                 continue
             # Création d'un layout vertical pour empiler le label et la tour
             tour_layout = BoxLayout(orientation='vertical', size_hint=(None, 1), width=tour_config["taille"][0], spacing=dp(5))
-            
+
             # Création et ajout du label avec le nom et le coût de la tour
-            tour_label = Label(text=f"{tour_config['nom']}\n{tour_config['cost']} coins",height=tour_config["taille"][1], width=tour_config["taille"][0], size_hint_y=.5, font_size=dp(10))
+            tour_label = Label(text=f"{tour_config['nom']}\n{tour_config['cost']} coins", height=tour_config["taille"][1], width=tour_config["taille"][0], size_hint_y=.5, font_size=dp(10))
             tour_layout.add_widget(tour_label)
-            
+
             # Création et ajout de la représentation de la tour
             tour = Tour(size=tour_config["taille"], color=tour_config["couleur"], tour_name=tour_config["nom"])
             tour_layout.add_widget(tour)

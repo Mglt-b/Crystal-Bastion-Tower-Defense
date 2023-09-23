@@ -136,6 +136,9 @@ class Tour(Widget):
         closest_monster = None
         closest_distance = float('inf')
 
+        if not self.parent: #try correct issue #1
+            return()
+
         if not self.parent.children: #try correct issue #1
             return()
         
