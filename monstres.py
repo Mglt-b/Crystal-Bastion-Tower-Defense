@@ -357,6 +357,8 @@ class Monstre(Widget):
         
         # Somme des dégâts réels
         total_damage = degats_reels_physiques + degats_reels_magiques
+
+        print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
         
         self.health -= total_damage
 

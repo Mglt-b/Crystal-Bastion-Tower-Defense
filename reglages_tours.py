@@ -1,6 +1,5 @@
 from kivy.metrics import dp
 img_directory = "tower_images/"
-from kivy.metrics import dp
 
 tours = [
     {
@@ -17,7 +16,7 @@ tours = [
     },
     {
         "nom": "Magique",
-        "degats_physiques": 5,
+        "degats_physiques": 0,
         "degats_magiques": 20,
         "temps_entre_attaque": 1,
         "taille": (dp(50), dp(50)),

@@ -123,6 +123,7 @@ niveaux = [
         "level": 1,
         "path": path_level_1,
         "monsters": [
+            {"type": "tank", "count": 1},
             {"type": "normal", "count": 1},
             {"type": "rapide", "count": 2},
             {"type": "normal", "count": 10},
@@ -152,8 +153,7 @@ niveaux = [
         "level": 3,
         "path": path_level_3,
         "monsters": [
-            {"type": "normal", "count": 1},
-            {"type": "rapide", "count": 0}
+            {"type": "tank", "count": 5},
                     ],
         "decor": [],
         "sol": [{"type": "decors_images/sols/futuriste_3.png",

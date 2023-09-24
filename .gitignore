@@ -1,8 +1,9 @@
 /__pycache__/
 /.buildozer/
 /bin/
-db/tower_buy.json
-db/first_complete_level.json
-db/stars.json
-db/cristaux.json
-db/progress.json
+/db/tower_buy.json
+/db/first_complete_level.json
+/db/stars.json
+/db/progress.json
+.gitignore
+/db/cristaux.json
