@@ -401,7 +401,7 @@ class TowerShopScreen(Screen):
             store_towers.put(tower_name, bought=True)
 
             # (Optionnel) Affichage d'une notification à l'utilisateur
-            popup = Popup(title='Succès', content=Label(text=f"Vous avez acheté {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
+            popup = Popup(title='Succès', content=Label(text=f"Tour achetée : {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
             popup.open()
         else:
             # Affichage d'une erreur si l'utilisateur n'a pas assez de cristaux
