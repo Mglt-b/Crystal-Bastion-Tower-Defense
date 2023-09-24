@@ -307,10 +307,8 @@ class Tour(Widget):
     def animate_attack(self):
         """Change l'image de la tour pour montrer l'animation d'attaque."""
         if self.niveau_amelioration > 0:
-            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
-            self.tower_image.opacity = 0.5
+            self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}_attack.png") 
         else:
-            print('anim att')
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_attack.png") 
 
         # Programme la remise à l'état normal après 0,5 seconde
