@@ -55,6 +55,7 @@ class Tour(Widget):
 
 
         self.img_directory = "tower_images/"
+
         self.projectile_speed = 10
         Clock.schedule_interval(self.attack, self.attack_speed)
 

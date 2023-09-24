@@ -37,6 +37,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.checkbox import CheckBox
 from kivymd.uix.button import MDFlatButton
 
+from kivymd.uix.card import MDCard
+
 class DeckScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -46,8 +48,6 @@ class DeckScreen(MDScreen):
 
         self.layout = MDBoxLayout(orientation='vertical', size_hint=(1, 1))
         self.add_widget(self.layout)
-
-
 
     def check_tower_selection(self, checkbox, value):
         # Limiter à 4 tours cochées
@@ -153,8 +153,6 @@ class DeckScreen(MDScreen):
             return False
         selected_towers = deck_store.get('selected_towers').get('towers', [])
         return tower_name in selected_towers
-
-
 
 class WorldScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -339,44 +337,60 @@ class TowerShopScreen(Screen):
         self.cristaux_label = Label(text=self.get_cristaux_str(), font_size=dp(16), size_hint_y=None, height=dp(50),  color="black")
         main_layout.add_widget(self.cristaux_label)
 
+        from kivy.uix.scrollview import ScrollView
 
-        layout = GridLayout(cols=4, spacing=[10, 10], padding=[10, 10], size_hint_x = 1)
-        
-        # Ajout des en-têtes de colonne
-        layout.add_widget(Label(text="Tour", size_hint_x=.3, valign='middle', color="black"))
-        layout.add_widget(Label(text="Coût", size_hint_x=.3, valign='middle', color="black"))
-        layout.add_widget(Label(text="Infos", size_hint_x=.2, valign='middle', color="black"))
-        layout.add_widget(Label(text="Buy", size_hint_x=.3, valign='middle', color="black"))
-        
+        # Création du ScrollView et du GridLayout pour les tours
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
+        layout = GridLayout(cols=4, spacing=10, padding=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter('height'))
+        scroll_view.add_widget(layout)
+        main_layout.add_widget(scroll_view)
+
         from reglages_tours import tours
+        img_directory = "tower_images/"
+        from kivy.uix.image import Image
 
         for tower in tours:
+            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding = [dp(0),dp(0),dp(0),dp(5)], spacing=dp(5), elevation=3)
+            tower_layout = BoxLayout(orientation='vertical')
+            
+            # Image de la tour
+            tower_image_source = os.path.join(img_directory, f"tower_{tower['nom']}.png")
+            tower_image = Image(source=tower_image_source, size_hint=(.85, .85),pos_hint= {'center_x': .5, 'center_y': .5})
+            tower_layout.add_widget(tower_image)
+            
+            tower_info_layout = MDBoxLayout(orientation='vertical', pos_hint= {'center_x': .5, 'center_y': .5}, spacing=dp(2),adaptive_size=True)
             if tower["nom"] == "Basique":  # Si la tour n'a pas été achetée, on passe à la suivante
                 continue
             tower_name = tower["nom"]
             tower_cost = tower["cristal_cost"]
             
             # Chaque tour aura trois éléments: nom, coût et bouton d'achat.
-            tower_label = Label(text=tower_name, valign='middle', halign='center', size_hint_y=None, height=dp(50), color="black")
-            cost_label = Label(text=str(tower_cost), valign='middle', halign='center', size_hint_y=None, height=dp(50), color="black")
+            tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
+                                font_size=sp(8))
+            cost_label = MDLabel(text=str(tower_cost), valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
+                                font_size=sp(8))
 
-            info_button = MDRaisedButton(text="Info", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(50))
+            info_button = MDRaisedButton(text="Info", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
             
 
             if self.is_tower_bought(tower_name):
-                buy_button = MDRaisedButton(text="Acheté", disabled=True)
+                buy_button = MDLabel(text="")
             else:
-                buy_button = MDRaisedButton(text="Acheter", on_release=partial(self.buy_tower, tower_name, tower_cost), size_hint_y=None, height=dp(50))
+                buy_button = MDRaisedButton(text="Buy", on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
 
             
-            layout.add_widget(tower_label)
-            layout.add_widget(cost_label)
-            layout.add_widget(info_button)
-            layout.add_widget(buy_button)
+            tower_layout.add_widget(tower_label)
+            tower_layout.add_widget(cost_label)
+            tower_info_layout.add_widget(info_button)
+            tower_info_layout.add_widget(buy_button)
 
+            tower_layout.add_widget(tower_info_layout)
+            tower_card.add_widget(tower_layout)
+            layout.add_widget(tower_card)
 
         
-        main_layout.add_widget(layout)
+
         self.add_widget(main_layout)
 
         # Bouton de retour
