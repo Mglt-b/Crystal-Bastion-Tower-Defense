@@ -30,8 +30,8 @@ monstre_configurations = {
         "size": (dp(50), dp(50)),
         "speed": 4,
         "health": 500,
-        "armure": 50,
-        "magique_resistance": 50, 
+        "armure": 100,
+        "magique_resistance": 0, 
         "coin": 100
     },
     # Ajoutez d'autres types de monstres ici...

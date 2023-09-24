@@ -50,7 +50,7 @@ class Tour(Widget):
         self.name = config["nom"]
         self.range = config["range"]
         self.attack_speed = config["temps_entre_attaque"]
-        self.degats_physiques = config["degats_physiques"]  # ou combinez les dégâts physiques et magiques si nécessaire
+        self.degats_physiques = config["degats_physiques"] 
         self.degats_magiques = config["degats_magiques"]
 
 
@@ -123,7 +123,9 @@ class Tour(Widget):
                     projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
                 else:
                     projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
-                
+                    print("self.degats_physiques", self.degats_physiques)
+                    print("self.degats_magiques", self.degats_magiques)
+                    
 
                 #print(f"Projectile created with speed: {projectile.speed}")  # Pour le débogage
                 #print('Projectile created and added to parent.', self, dt)
@@ -135,6 +137,8 @@ class Tour(Widget):
     def find_closest_monster(self):
         closest_monster = None
         closest_distance = float('inf')
+
+        print("range:",self.range)
 
         if not self.parent: #try correct issue #1
             return()
@@ -264,9 +268,10 @@ class Tour(Widget):
         if self.niveau_amelioration < len(ameliorations.get(self.name, [])):
             
             self.attack_speed = upgrade_data["temps_entre_attaque"]
-            self.damage = upgrade_data["degats_physiques"]
             self.range = upgrade_data["range"]
-            self.color = upgrade_data["color"]
+            self.attack_speed = upgrade_data["temps_entre_attaque"]
+            self.degats_physiques = upgrade_data["degats_physiques"] 
+            self.degats_magiques = upgrade_data["degats_magiques"]
             # Déduisez le coût de l'amélioration des pièces du joueur
             self.parent.coins -= upgrade_data["cout_amelioration"]
             # Mettez à jour le label du compteur de pièces
@@ -313,12 +318,12 @@ class Tour(Widget):
 
     def reset_image(self, *args):
         """Remet l'image de la tour à son état normal en fonction du niveau d'amélioration."""
-        print("lvl ammelio",self.niveau_amelioration)
+        #print("lvl ammelio",self.niveau_amelioration)
         if self.niveau_amelioration > 0:
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}_{self.niveau_amelioration}.png")
             self.tower_image.opacity = 1
         else:
             self.tower_image.source = os.path.join(self.img_directory, f"tower_{self.name}.png") 
             self.tower_image.opacity = 1
-            print(f"tower_{self.name}.png")
+            #print(f"tower_{self.name}.png")
 
