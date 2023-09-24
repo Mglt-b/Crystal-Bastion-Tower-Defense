@@ -56,7 +56,10 @@ class TourSelectionZone(BoxLayout):
         self.padding = [dp(10), 0, 0, 0]
 
         deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
-        selected_towers = deck_store.get('selected_towers')['towers']
+        if deck_store.exists('selected_towers'):
+            selected_towers = deck_store.get('selected_towers')['towers']
+        else :
+            selected_towers = []
 
         # Ajout de l'arrière-plan
         with self.canvas.before:

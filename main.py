@@ -129,7 +129,7 @@ class DeckScreen(MDScreen):
         self.tower_selection_layout = BoxLayout(orientation='vertical', spacing=dp(10))
         for tower in self.bought_towers:
             tower_layout = BoxLayout(orientation='horizontal', spacing=dp(10))
-            checkbox = CheckBox(size_hint_x=None, width=dp(50))
+            checkbox = CheckBox(size_hint_x=None, width=dp(50), color=[0, 0, 0, 1])
             checkbox.bind(active=self.check_tower_selection)
             tower_label = Label(text=tower, size_hint_x=0.8, color=(0, 0, 0, 1))  # Texte en noir
             # Cocher la case si la tour est déjà cochée dans le fichier JSON
