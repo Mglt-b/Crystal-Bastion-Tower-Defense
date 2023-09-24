@@ -7,3 +7,6 @@
 /db/progress.json
 .gitignore
 /db/cristaux.json
+db/cristaux.json
+db/progress.json
+db/tower_deck.json
