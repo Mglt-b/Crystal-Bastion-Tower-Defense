@@ -100,11 +100,17 @@ class Monstre(Widget):
             # Barre de vie intérieure (verte)
             self.barre_vie = Rectangle(pos=(self.center_x, self.center_y - dp(10)), size=(self.largeur, dp(5)))
 
-
+        #for ice tower
         self.freeze_effect = Image(source="effect_images/Freeze_image.png", opacity=0, size=(type_monstre["size"][0]/2,type_monstre["size"][1]/2), pos=(self.center_x,self.center_y))
         self.update_freeze_effect_position()
         self.add_widget(self.freeze_effect)
         self.slowed = False  # New property to track if the monster is slowed
+
+        #for fire tower
+        self.burn_effect = Image(source="effect_images/Burned_image.png", opacity=0, size=(type_monstre["size"][0]/2,type_monstre["size"][1]/2), pos=(self.center_x,self.center_y))
+        self.update_burn_effect_position()
+        self.add_widget(self.burn_effect)
+        self.burned = False  # New property to track if the monster is slowed
 
         # Start moving
         self.move()
@@ -140,6 +146,59 @@ class Monstre(Widget):
         self.freeze_effect.opacity = 0  # Hide the freeze effect
         self.monster_image.opacity = 1
 
+    def update_burn_effect_position(self):
+        # Center the freeze effect on the monster
+        self.burn_effect.center = self.center
+
+
+    def apply_burn_effect(self):
+        if not self.burned:
+            self.burned = True
+            self.burn_effect.opacity = 1  # Show the burn effect
+            
+            # Schedule the damage every 2 seconds
+            self.burn_event = Clock.schedule_interval(self.burn_damage, 2)
+            
+            # Stop the burn damage after 10 seconds
+            Clock.schedule_once(self.remove_burn_effect, 15)
+
+    def burn_damage(self, dt):
+        # Inflict 5 points of damage
+        self.take_damage(5, 0)  # Assuming burn is physical damage. Adjust if otherwise.
+
+    def remove_burn_effect(self, dt=None):
+        self.burned = False
+        self.burn_effect.opacity = 0  # Hide the burn effect
+        Clock.unschedule(self.burn_event)  # Stop the recurring damage
+
+    def take_damage(self, damage_physique, damage_magique):
+        # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique
+        degats_reels_physiques = damage_physique * (1 - (self.armure / (100 + self.armure)))
+        degats_reels_magiques = damage_magique * (1 - (self.magique_resistance / (100 + self.magique_resistance)))
+        
+        # Somme des dégâts réels
+        total_damage = degats_reels_physiques + degats_reels_magiques
+
+        print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
+        
+        self.health -= total_damage
+
+        # Mettre à jour la taille de la barre de vie
+        pct_vie = self.health / self.vie_max
+        self.barre_vie.size = (self.largeur * pct_vie, dp(5))
+        with self.canvas:
+            Color(1, 0, 0, 1)  # Rouge
+            self.barre_vie_perdue.size = (self.largeur * (1 - pct_vie), dp(5))
+
+        # Mettre à jour la couleur de la barre de vie
+        if pct_vie < 0.5:
+            Color(1, 0, 0, 1)  # Rouge
+        else:
+            Color(0, 1, 0, 1)  # Vert
+
+        if self.health < 1 :
+            self.dead_monster()
+
     def move(self):
         root_widget = App.get_running_app().root
         map_zone = root_widget.get_screen('game').map_zone  # Accédez directement à map_zone via la référence root_widget
@@ -151,6 +210,7 @@ class Monstre(Widget):
         distance = (dx**2 + dy**2)**0.5
 
         self.freeze_effect.pos = self.center
+        self.burn_effect.pos = self.center
         
         # If close to the target, move to next target
         if distance < self.speed:
@@ -350,33 +410,6 @@ class Monstre(Widget):
                 # Marquer le niveau comme complété pour la première fois
                 first_complete_store.put(level_id, completed=True)
        
-    def take_damage(self, damage_physique, damage_magique):
-        # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique
-        degats_reels_physiques = damage_physique * (1 - (self.armure / (100 + self.armure)))
-        degats_reels_magiques = damage_magique * (1 - (self.magique_resistance / (100 + self.magique_resistance)))
-        
-        # Somme des dégâts réels
-        total_damage = degats_reels_physiques + degats_reels_magiques
-
-        print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
-        
-        self.health -= total_damage
-
-        # Mettre à jour la taille de la barre de vie
-        pct_vie = self.health / self.vie_max
-        self.barre_vie.size = (self.largeur * pct_vie, dp(5))
-        with self.canvas:
-            Color(1, 0, 0, 1)  # Rouge
-            self.barre_vie_perdue.size = (self.largeur * (1 - pct_vie), dp(5))
-
-        # Mettre à jour la couleur de la barre de vie
-        if pct_vie < 0.5:
-            Color(1, 0, 0, 1)  # Rouge
-        else:
-            Color(0, 1, 0, 1)  # Vert
-
-        if self.health < 1 :
-            self.dead_monster()
 
     def dead_monster(self):
         if self.parent:

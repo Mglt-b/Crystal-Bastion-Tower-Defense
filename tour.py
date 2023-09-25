@@ -6,7 +6,7 @@ from kivy.clock import Clock, partial
 
 from monstres import Monstre
 from reglages_tours import tour_dict
-from projectile import Projectile, IceProjectile
+from projectile import Projectile, IceProjectile, FireProjectile
 
 from kivymd.uix.button import MDIconButton
 
@@ -17,6 +17,7 @@ import uuid, os
 from kivy.metrics import dp, sp
 
 import math
+from kivy.storage.jsonstore import JsonStore
 
 def calculate_angle(source, target):
     dx = target[0] - source[0]
@@ -44,14 +45,21 @@ class Tour(Widget):
 
         config = tour_dict[tour_name]
 
+        # Lisez les talents actuels depuis le fichier JSON
+        talents = self.get_current_talents()
+
+        # Ajustez les attributs de la tour en fonction des talents
+        self.range = config["range"] * (1 + talents["speed"] / 100)
+        self.attack_speed = config["temps_entre_attaque"] -(config["temps_entre_attaque"] * (talents["speed"] / 100))
+        print("self.attack_speed", self.attack_speed)
+        self.degats_physiques = config["degats_physiques"] * (1 + talents["attack_phy"] / 100)
+        self.degats_magiques = config["degats_magiques"] * (1 + talents["attack_mag"] / 100)
+
+
         self.size = config["taille"]
 
         self.proj_col = config["projectile_color"]
         self.name = config["nom"]
-        self.range = config["range"]
-        self.attack_speed = config["temps_entre_attaque"]
-        self.degats_physiques = config["degats_physiques"] 
-        self.degats_magiques = config["degats_magiques"]
 
 
         self.img_directory = "tower_images/"
@@ -76,6 +84,20 @@ class Tour(Widget):
         self.niveau_amelioration = 0
 
         self.range_circle = None
+
+    def get_current_talents(self):
+        # Lisez les talents depuis le fichier JSON et retournez-les sous forme de dictionnaire
+        talent_store = JsonStore("db/talent.json")
+        if not talent_store.exists("speed"):
+            # Si le fichier n'existe pas encore, initialisez les talents à 0
+            return {"speed": 0, "attack_phy": 0, "attack_mag": 0, "range": 0}
+        
+        return {
+            "speed": talent_store.get("speed")["value"],
+            "attack_phy": talent_store.get("attack_phy")["value"],
+            "attack_mag": talent_store.get("attack_mag")["value"],
+            "range": talent_store.get("range")["value"]
+        }
 
     def update_graphics_pos(self, instance, value):
         self.bg.pos = value
@@ -122,10 +144,12 @@ class Tour(Widget):
 
                 if self.name == "Ice":
                     projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                if self.name == "Fire":
+                    projectile = FireProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
                 else:
                     projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
-                    print("self.degats_physiques", self.degats_physiques)
-                    print("self.degats_magiques", self.degats_magiques)
+                    #print("self.degats_physiques", self.degats_physiques)
+                    #print("self.degats_magiques", self.degats_magiques)
                     
 
                 #print(f"Projectile created with speed: {projectile.speed}")  # Pour le débogage

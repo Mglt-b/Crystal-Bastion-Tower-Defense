@@ -7,3 +7,6 @@
 /db/progress.json
 .gitignore
 /db/cristaux.json
+/build/
+main.spec
+/dist/

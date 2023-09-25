@@ -35,9 +35,115 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 
 from kivy.uix.checkbox import CheckBox
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDFillRoundFlatIconButton
 
 from kivymd.uix.card import MDCard
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.storage.jsonstore import JsonStore
+from kivymd.uix.button import MDRaisedButton
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+
+class TalentScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        main_scroll0 = BoxLayout(orientation='vertical', size_hint=(1, .9), pos_hint= {'top': 1, 'top': 1})
+        main_scroll = ScrollView(do_scroll_x=False)
+        main_scroll0.add_widget(main_scroll)
+        
+        main_layout = BoxLayout(orientation='vertical', spacing=dp(10), size_hint_y=None)
+        main_scroll.add_widget(main_layout)
+        
+        # Afficher le compteur d'étoiles en haut
+        self.star_count = self.get_stars_from_json()
+        self.star_label = Label(text=f"Étoiles : {self.star_count}", font_size=dp(16), size_hint_y=None, height=dp(50), color="black")
+        main_layout.add_widget(self.star_label)
+        
+        # Initialisez le dictionnaire pour stocker les labels des talents
+        self.talent_labels = {}
+        # Liste des talents
+        self.talents = ["speed", "attack_phy", "attack_mag", "range", "extra ice effect", "extra fire damage", "extra bomb damage", "extra life points"]
+
+        # Lire la valeur totale des étoiles
+        self.star_count = self.get_stars_from_json()
+
+        # Soustraire la somme des valeurs des talents
+        for talent in self.talents:
+            self.star_count -= self.get_talent_value(talent)
+
+        # Mettre à jour le label du compteur d'étoiles
+        self.star_label.text = f"Étoiles : {self.star_count} ({self.get_stars_from_json()})"
+
+
+        
+        for talent in self.talents:
+            talent_card = MDCard(size_hint=(.9, None), height=dp(50), style="outlined", line_color=(0.2, 0.2, 0.2, 1), pos_hint= {'center_x': .5, 'center_y': .5},padding = [dp(5),dp(5),dp(5),dp(5)], spacing=dp(5), elevation=3)
+            talent_layout = BoxLayout(size_hint=(1, 1),spacing=dp(5))
+            
+            talent_value = self.get_talent_value(talent)
+            talent_label = MDLabel(text=f"{talent}: +{talent_value}%", size_hint_x=0.6, color="black")
+            
+            # Stocker une référence au label dans le dictionnaire
+            self.talent_labels[talent] = talent_label
+            
+            add_button = MDRaisedButton(text="+", on_release=lambda x, t=talent: self.modify_talent(t, 1),size_hint=(.2, None))
+            subtract_button = MDRaisedButton(text="-", on_release=lambda x, t=talent: self.modify_talent(t, -1))
+            
+            talent_layout.add_widget(talent_label)
+            talent_layout.add_widget(add_button)
+            talent_layout.add_widget(subtract_button)
+            
+            talent_card.add_widget(talent_layout)
+            main_layout.add_widget(talent_card)
+        
+        # À la fin de la méthode __init__, définissez la hauteur de main_layout.
+        main_layout.height = len(self.talents) * (dp(50) + dp(10)) + dp(50)  # hauteur de MDCard + espacement + hauteur du label d'étoile
+
+        # Ajoutez main_scroll0 (qui contient le ScrollView) au screen
+        self.add_widget(main_scroll0)
+
+        # Create a horizontal layout for back
+        back_layout = BoxLayout(orientation='horizontal', spacing=dp(10), height=dp(20))
+        # Back button
+        back_button = MDRaisedButton(text="Retour", on_release=self.return_to_world_selection)
+
+        back_layout.add_widget(back_button)
+        self.add_widget(back_layout)
+
+    def get_stars_from_json(self):
+        # Chargez le total des étoiles du fichier JSON
+        store = JsonStore('db/stars.json')
+        total_stars = sum([store.get(key)["stars"] for key in store.keys()])
+        return total_stars
+    
+    def get_talent_value(self, talent_name):
+        # Chargez la valeur du talent du fichier JSON
+        store = JsonStore("db/talent.json")
+        if not store.exists(talent_name):
+            store.put(talent_name, value=0)
+        return store.get(talent_name)["value"]
+    
+    def modify_talent(self, talent_name, value):
+        current_value = self.get_talent_value(talent_name)
+        new_value = current_value + value
+        
+        # Assurez-vous qu'il y a assez d'étoiles et que la valeur ne devient pas négative
+        if (self.star_count - value >= 0) and (new_value >= 0) and (new_value <= 20):
+            store = JsonStore("db/talent.json")
+            store.put(talent_name, value=new_value)
+            
+            # Mettez à jour le compteur d'étoiles
+            self.star_count -= value
+            self.star_label.text = f"Étoiles : {self.star_count}"
+            
+            # Mettez à jour le label du talent
+            self.talent_labels[talent_name].text = f"{talent_name}: +{new_value}%"
+
+    def return_to_world_selection(self, instance):
+        self.manager.current = 'worlds'
 
 class DeckScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -158,20 +264,19 @@ class WorldScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.worldscreen_widget = Widget()
-        self.add_widget(self.worldscreen_widget)
-
         layout = MDBoxLayout(orientation='vertical', size_hint=(1, 1))
         self.add_widget(layout)
 
         # Top bar for counters
-        top_bar = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height=dp(50), spacing=dp(5))
+        top_bar = MDBoxLayout(orientation='horizontal', size_hint=(.5, None), height=dp(50), spacing=dp(10))
+        top_bar2 = GridLayout(rows=1, cols=3,spacing=dp(5), padding=[dp(5),dp(0),dp(5),dp(0)])
         layout.add_widget(top_bar)  # Assurez-vous de l'ajouter en premier pour qu'il soit en haut
+        layout.add_widget(top_bar2)  # Assurez-vous de l'ajouter en premier pour qu'il soit en haut
         
         # Cristaux counter
         crystal_icon = MDIconButton(icon="diamond-stone", font_size=dp(24), text_color="blue", theme_text_color="Custom")
         self.cristaux_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
-        crystal_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
+        crystal_layout = BoxLayout(orientation='horizontal',  size_hint_x = .1)
         crystal_layout.add_widget(crystal_icon)
         crystal_layout.add_widget(self.cristaux_label)
         top_bar.add_widget(crystal_layout)
@@ -179,18 +284,20 @@ class WorldScreen(MDScreen):
         # Stars counter
         star_icon = MDIconButton(icon="star", font_size=dp(24), text_color=(1, 0.84, 0, 1), theme_text_color="Custom")
         self.stars_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
-        star_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
+        star_layout = BoxLayout(orientation='horizontal', size_hint_x = .1)
 
         star_layout.add_widget(star_icon)
         star_layout.add_widget(self.stars_label)
         top_bar.add_widget(star_layout)
 
-        tour_shop = MDRaisedButton(text="tour_shop", size_hint_x = .4)
-        top_bar.add_widget(tour_shop)
-        tour_shop.bind(on_release=self.open_tower_shop)
+        tour_shop = MDFlatButton(text="Shop", size_hint_x = 1, text_color= "black", line_color= "black", on_release=self.open_tower_shop)
+        top_bar2.add_widget(tour_shop)
 
-        deck_button = MDRaisedButton(text="Deck", on_release=self.open_deck, size_hint_x = .4)
-        top_bar.add_widget(deck_button)
+        deck_button = MDFlatButton(text="Deck", on_release=self.open_deck, size_hint_x = 1, text_color= "black", line_color= "black")
+        top_bar2.add_widget(deck_button)
+
+        talents_button = MDFlatButton(text="Talents", size_hint_x = 1, text_color= "black", line_color= "black", on_release=self.open_talent)
+        top_bar2.add_widget(talents_button)
 
 
 
@@ -206,6 +313,9 @@ class WorldScreen(MDScreen):
                       (dp(20), dp(220)),
                       (Window.width -dp(110), dp(260))]
         p=0
+
+        self.worldscreen_widget = Widget()
+        layout.add_widget(self.worldscreen_widget)
         for world in worlds:
             button = MDRaisedButton(text=world, on_release=partial(self.select_world, world), pos=pos_worlds[p])
             self.worldscreen_widget.add_widget(button)
@@ -217,6 +327,9 @@ class WorldScreen(MDScreen):
 
     def open_deck(self,instance):
         self.manager.current = 'deck'
+
+    def open_talent(self,instance):
+        self.manager.current = 'talent'
 
     def open_tower_shop(self,instance):
         self.manager.current = 'tower_shop'
@@ -337,7 +450,6 @@ class TowerShopScreen(Screen):
         self.cristaux_label = Label(text=self.get_cristaux_str(), font_size=dp(16), size_hint_y=None, height=dp(50),  color="black")
         main_layout.add_widget(self.cristaux_label)
 
-        from kivy.uix.scrollview import ScrollView
 
         # Création du ScrollView et du GridLayout pour les tours
         scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
@@ -351,7 +463,7 @@ class TowerShopScreen(Screen):
         from kivy.uix.image import Image
 
         for tower in tours:
-            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding = [dp(0),dp(0),dp(0),dp(5)], spacing=dp(5), elevation=3)
+            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding = [dp(0),dp(5),dp(0),dp(5)], spacing=dp(5), elevation=3)
             tower_layout = BoxLayout(orientation='vertical')
             
             # Image de la tour
@@ -368,20 +480,19 @@ class TowerShopScreen(Screen):
             # Chaque tour aura trois éléments: nom, coût et bouton d'achat.
             tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
                                 font_size=sp(8))
-            cost_label = MDLabel(text=str(tower_cost), valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
-                                font_size=sp(8))
 
-            info_button = MDRaisedButton(text="Info", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+            info_button = MDIconButton(icon="information-variant-circle-outline", icon_size= "18sp", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
             
 
             if self.is_tower_bought(tower_name):
                 buy_button = MDLabel(text="")
             else:
-                buy_button = MDRaisedButton(text="Buy", on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
-
+                buy_button = MDFillRoundFlatIconButton(icon="diamond-stone", icon_size= "12sp", font_size= "12sp", text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+                #buy_button = MDRaisedButton(text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+                
             
             tower_layout.add_widget(tower_label)
-            tower_layout.add_widget(cost_label)
+
             tower_info_layout.add_widget(info_button)
             tower_info_layout.add_widget(buy_button)
 
@@ -415,11 +526,11 @@ class TowerShopScreen(Screen):
             store_towers.put(tower_name, bought=True)
 
             # (Optionnel) Affichage d'une notification à l'utilisateur
-            popup = Popup(title='Succès', content=Label(text=f"Tour achetée : {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
+            popup = Popup(title='Succès', content=Label(text=f"Tour achetée : \n\n {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
             popup.open()
         else:
             # Affichage d'une erreur si l'utilisateur n'a pas assez de cristaux
-            popup = Popup(title='Erreur', content=Label(text="Vous n'avez pas assez de cristaux!"), size_hint=(0.6, 0.4))
+            popup = Popup(title='Erreur', content=Label(text="Vous n'avez pas assez de cristaux!"), size_hint=(0.9, 0.3))
             popup.open()
 
     def get_cristaux_str(self):
@@ -467,9 +578,7 @@ class TowerShopScreen(Screen):
 
     def update_buy_button(self, tower_name, instance, *args):
         if self.is_tower_bought(tower_name):
-            instance.text = "Acheté"
-            instance.disabled = True
-            instance.on_release = None
+            instance.parent.remove_widget(instance)
 
 class GameScreen(Screen):
     def __init__(self, **kwargs):
@@ -509,6 +618,7 @@ class MenuApp(MDApp):
         sm.add_widget(GameScreen(name='game'))
         sm.add_widget(TowerShopScreen(name='tower_shop'))
         sm.add_widget(DeckScreen(name='deck'))
+        sm.add_widget(TalentScreen(name="talent"))
 
         self.scheduled_functions = []
         self.active_monsters = []
