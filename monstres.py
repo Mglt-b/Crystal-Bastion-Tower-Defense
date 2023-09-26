@@ -112,6 +112,13 @@ class Monstre(Widget):
         self.add_widget(self.burn_effect)
         self.burned = False  # New property to track if the monster is slowed
 
+        #for Elec tower
+        self.elec_effect = Image(source="effect_images/Elected_image.png", opacity=0, size=(type_monstre["size"][0]/2,type_monstre["size"][1]/2), pos=(self.center_x,self.center_y))
+        self.update_elec_effect_position()
+        self.add_widget(self.elec_effect)
+        self.elected = False  # New property to track if the monster is slowed
+
+
         # Start moving
         self.move()
         anim = Animation(angle=360, duration=1)
@@ -146,10 +153,34 @@ class Monstre(Widget):
         self.freeze_effect.opacity = 0  # Hide the freeze effect
         self.monster_image.opacity = 1
 
+
+
+    def update_elec_effect_position(self):
+        # Center the freeze effect on the monster
+        self.freeze_effect.center = self.center
+
+    def apply_elec_effect(self):
+        if not self.elected:
+            self.elected = True
+            self.elec_effect.opacity = 1  # Show the freeze effect with some transparency
+            original_speed = self.speed
+            self.speed = 0  # Halving the speed
+            # Reset the speed after 2 seconds (or other desired duration)
+            self.monster_image.opacity = .7
+            Clock.schedule_once(lambda dt: self.remove_elec_effect(original_speed), 5)
+            
+    def remove_elec_effect(self, original_speed):
+        self.elected = False
+        self.speed = original_speed
+        self.elec_effect.opacity = 0  # Hide the freeze effect
+        self.monster_image.opacity = 1
+
+
+
+
     def update_burn_effect_position(self):
         # Center the freeze effect on the monster
         self.burn_effect.center = self.center
-
 
     def apply_burn_effect(self):
         if not self.burned:
@@ -211,7 +242,8 @@ class Monstre(Widget):
 
         self.freeze_effect.pos = self.center
         self.burn_effect.pos = self.center
-        
+        self.elec_effect.pos = self.center
+
         # If close to the target, move to next target
         if distance < self.speed:
             self.current_target_idx += 1

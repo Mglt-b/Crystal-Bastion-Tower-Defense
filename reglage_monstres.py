@@ -12,7 +12,7 @@ monstre_configurations = {
         "health": 100,
         "armure": 20,
         "magique_resistance": 10, 
-        "coin": 20
+        "coin": 10
     },
     "rapide": {
         "name": "Rapide",
@@ -22,7 +22,7 @@ monstre_configurations = {
         "health": 50,
         "armure": 5,
         "magique_resistance": 0, 
-        "coin": 25
+        "coin": 10
     },
     "tank": {
         "name": "Tank",
@@ -32,7 +32,7 @@ monstre_configurations = {
         "health": 500,
         "armure": 100,
         "magique_resistance": 0, 
-        "coin": 100
+        "coin": 50
     },
     # Ajoutez d'autres types de monstres ici...
 }

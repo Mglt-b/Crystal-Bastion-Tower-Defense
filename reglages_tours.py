@@ -12,7 +12,8 @@ tours = [
         "range": dp(115),
         "projectile_color": [1, 0.5, 0.5, 1],
         'cost': 50,
-        'cristal_cost':30    
+        'cristal_cost':30,
+        'extra_effect': ""
     },
     {
         "nom": "Magique",
@@ -24,7 +25,8 @@ tours = [
         "range": dp(100),
         "projectile_color": [0, 0, 1, 1],  # Bleu
         'cost': 50,
-        'cristal_cost':50   
+        'cristal_cost':50,
+        'extra_effect': ""  
     },
     {
         "nom": "Rapide",
@@ -36,7 +38,8 @@ tours = [
         "range": dp(100),
         "projectile_color": [0, 1, 0, 1],  # Vert
         'cost': 50,
-        'cristal_cost':50   
+        'cristal_cost':50,
+        'extra_effect': ""   
     },
     {
         "nom": "Ice",
@@ -48,7 +51,8 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500
+        'cristal_cost':500,
+        'extra_effect': "Snare"
     },
     ##############################################################
     {
@@ -60,8 +64,35 @@ tours = [
         "couleur": [0.5, 0.5, 1, 1], 
         "range": dp(100),
         "projectile_color": [0.5, 0.5, 1, 1],
+        'cost': 40,
+        'cristal_cost':0,
+        'extra_effect': "Burn dot"
+    },
+    {
+        "nom": "Elec",
+        "degats_physiques": 0,  # ou un autre nombre approprié
+        "degats_magiques": 5,
+        "temps_entre_attaque": 3,  # ou un autre nombre approprié
+        "taille": (dp(50), dp(50)),
+        "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
+        "range": dp(100),  # ou un autre nombre approprié
+        "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
+        'cost': 20,
+        'cristal_cost':0,
+        'extra_effect': "Roots"
+    },
+    {
+        "nom": "Bomb",
+        "degats_physiques": 0,  # ou un autre nombre approprié
+        "degats_magiques": 0,
+        "temps_entre_attaque": 1,  # ou un autre nombre approprié
+        "taille": (dp(50), dp(50)),
+        "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
+        "range": dp(100),  # ou un autre nombre approprié
+        "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':0
+        'cristal_cost':0,
+        'extra_effect': "Bomb"  
     },
     {
         "nom": "test2",
@@ -73,7 +104,8 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500
+        'cristal_cost':500,
+        'extra_effect': ""  
     },
     {
         "nom": "test2",
@@ -85,7 +117,8 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500
+        'cristal_cost':500,
+        'extra_effect': ""  
     },
     {
         "nom": "test2",
@@ -97,7 +130,8 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500
+        'cristal_cost':500,
+        'extra_effect': ""  
     },
     {
         "nom": "test2",
@@ -109,31 +143,8 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500
-    },
-    {
-        "nom": "test2",
-        "degats_physiques": 5,  # ou un autre nombre approprié
-        "degats_magiques": 0,
-        "temps_entre_attaque": 1,  # ou un autre nombre approprié
-        "taille": (dp(50), dp(50)),
-        "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
-        "range": dp(100),  # ou un autre nombre approprié
-        "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
-        'cost': 60,
-        'cristal_cost':500
-    },
-    {
-        "nom": "test2",
-        "degats_physiques": 5,  # ou un autre nombre approprié
-        "degats_magiques": 0,
-        "temps_entre_attaque": 1,  # ou un autre nombre approprié
-        "taille": (dp(50), dp(50)),
-        "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
-        "range": dp(100),  # ou un autre nombre approprié
-        "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
-        'cost': 60,
-        'cristal_cost':500
+        'cristal_cost':500,
+        'extra_effect': ""  
     }
     # Ajoutez d'autres configurations de tours ici si nécessaire
 ]

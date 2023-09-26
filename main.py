@@ -1,3 +1,4 @@
+#http://www.geofish.fr/td-privacy/
 from kivy import platform
 if platform == "win":   
     from kivy.modules.screen import apply_device
@@ -45,6 +46,12 @@ from kivy.storage.jsonstore import JsonStore
 from kivymd.uix.button import MDRaisedButton
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.image import Image
+
+from kivy.properties import BooleanProperty
+
+class ActiveBoxLayout(BoxLayout):
+    active = BooleanProperty(False)
 
 class TalentScreen(Screen):
     def __init__(self, **kwargs):
@@ -65,7 +72,7 @@ class TalentScreen(Screen):
         # Initialisez le dictionnaire pour stocker les labels des talents
         self.talent_labels = {}
         # Liste des talents
-        self.talents = ["speed", "attack_phy", "attack_mag", "range", "extra ice effect", "extra fire damage", "extra bomb damage", "extra life points"]
+        self.talents = ["ATK speed", "Physical ATK", "Magiq ATK", "ATK range", "Ice snare long","Ice snare speed", "Fire damage", "Elec root", " Bomb damage", "Life points"]
 
         # Lire la valeur totale des étoiles
         self.star_count = self.get_stars_from_json()
@@ -84,7 +91,7 @@ class TalentScreen(Screen):
             talent_layout = BoxLayout(size_hint=(1, 1),spacing=dp(5))
             
             talent_value = self.get_talent_value(talent)
-            talent_label = MDLabel(text=f"{talent}: +{talent_value}%", size_hint_x=0.6, color="black")
+            talent_label = MDLabel(text=f"{talent}:\n+{talent_value}%", size_hint_x=0.6, color="black")
             
             # Stocker une référence au label dans le dictionnaire
             self.talent_labels[talent] = talent_label
@@ -140,7 +147,7 @@ class TalentScreen(Screen):
             self.star_label.text = f"Étoiles : {self.star_count}"
             
             # Mettez à jour le label du talent
-            self.talent_labels[talent_name].text = f"{talent_name}: +{new_value}%"
+            self.talent_labels[talent_name].text = f"{talent_name}:\n+{new_value}%"
 
     def return_to_world_selection(self, instance):
         self.manager.current = 'worlds'
@@ -149,26 +156,133 @@ class DeckScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.worldscreen_widget = Widget()
-        self.add_widget(self.worldscreen_widget)
+        self.main_layout = BoxLayout(orientation='vertical')
+        self.add_widget(self.main_layout)
 
-        self.layout = MDBoxLayout(orientation='vertical', size_hint=(1, 1))
-        self.add_widget(self.layout)
+        # Display the crystal counter at the top
+        self.cristaux_label = Label(text=self.get_cristaux_str(), font_size=dp(16), size_hint_y=None, height=dp(50), color="black")
+        self.main_layout.add_widget(self.cristaux_label)
+
+        # Creating the ScrollView and GridLayout for the towers
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
+        self.layout = GridLayout(cols=3, spacing=10, padding=10, size_hint_y=None)
+        self.layout.bind(minimum_height=self.layout.setter('height'))
+        scroll_view.add_widget(self.layout)
+        self.main_layout.add_widget(scroll_view)
+
+        # Create a list to store the checkboxes
+        self.checkboxes = []
+        # Changez votre liste de checkboxes pour stocker des tuples
+        self.tower_data = []
+
+        # Button to save the selection
+        save_button = MDRaisedButton(text="Sauvegarder", on_release=self.save_deck, size_hint_y=None, height=dp(50))
+        self.main_layout.add_widget(save_button)  # Add to main_layout
+
+
+    def on_enter(self, *args):
+
+        # Nettoyez les widgets précédents
+        self.layout.clear_widgets()
+        self.tower_data = []
+        self.checkboxes = []
+
+        # Load the towers
+        from reglages_tours import tours
+        img_directory = "tower_images/"
+        self.bought_towers = self.get_bought_towers()
+
+        for tower in tours:
+            if tower["nom"] not in self.bought_towers and tower["nom"] != "Basique":
+                continue
+            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding=[dp(0), dp(5), dp(0), dp(5)], spacing=dp(5), elevation=3)
+            tower_layout = ActiveBoxLayout(orientation='vertical')
+
+            # Tower image
+            tower_image_source = os.path.join(img_directory, f"tower_{tower['nom']}.png")
+            tower_image = Image(source=tower_image_source, size_hint=(.85, .85), pos_hint={'center_x': .5, 'center_y': .5})
+            tower_layout.add_widget(tower_image)
+
+            tower_info_layout = MDBoxLayout(orientation='vertical', pos_hint={'center_x': .5, 'center_y': .5}, spacing=dp(2), adaptive_size=True)
+            tower_name = tower["nom"]
+
+            tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint={'center_x': .5, 'center_y': .5}, font_size=sp(8))
+
+            checkbox = CheckBox(size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+            checkbox.bind(active=tower_layout.setter('active'))
+
+            tower_layout.bind(active=self.check_tower_selection)
+            
+            # Ajouter le label de la tour à tower_layout
+            tower_layout.add_widget(tower_label)
+
+            # Ajouter la checkbox à tower_info_layout
+            tower_layout.add_widget(checkbox)
+            tower_layout.add_widget(tower_info_layout)
+
+            # Ajouter tower_layout à tower_card
+            tower_card.add_widget(tower_layout)
+
+            # Ajouter tower_card au layout principal
+            self.layout.add_widget(tower_card)
+
+            # Ajouter la checkbox à la liste de checkboxes
+            self.checkboxes.append(checkbox)
+
+            self.tower_data.append((tower["nom"], checkbox))
+
+        # Mettez à jour l'état des checkboxes en fonction des tours sélectionnées
+        selected_towers = self.get_selected_towers()
+        print("self.tower_data :", self.tower_data)
+        print("selected_towers : ", selected_towers)
+        for tower_name, checkbox in self.tower_data:
+            if tower_name in selected_towers:
+                print("turn active", checkbox, tower_name)
+                checkbox.active = True
+
+    def get_selected_towers(self):
+        """Return a list of currently selected tower names."""
+        deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
+        if not deck_store.exists('selected_towers'):
+            return []
+        return deck_store.get('selected_towers').get('towers', [])
+
+    def get_bought_towers(self):
+        store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
+        return [key for key, data in store_towers.find(bought=True)]
 
     def check_tower_selection(self, checkbox, value):
-        # Limiter à 4 tours cochées
+        # Limit to 4 checked towers
         if value and sum([cb.active for cb in self.checkboxes]) > 4:
             checkbox.active = False
+            for child in checkbox.children:
+                if isinstance(child, CheckBox):
+                    child.active = False
+            
     
     def save_deck(self, instance):
-        # Enregistrez les tours sélectionnées dans tower_deck.json
-        selected_towers = [tower for tower, checkbox in zip(self.bought_towers, self.checkboxes) if checkbox.active]
+        print("Saving deck...")
+        from reglages_tours import tours
+            
+        selected_towers = [tower_name for tower_name, checkbox in self.tower_data if checkbox.active]
+        print(f"Selected towers: {selected_towers}")
+            
         deck_store = JsonStore(os.path.join('db', 'tower_deck.json'))
         deck_store.put('selected_towers', towers=selected_towers)
+        print("Deck saved successfully!")
+        
         self.return_to_world_selection(instance)
+
 
     def return_to_world_selection(self, instance):
         self.manager.current = 'worlds'
+
+    def get_cristaux_str(self):
+        store = JsonStore(os.path.join('db', 'cristaux.json'))
+        if not store.exists('count'):
+            store.put('count', value=0)
+        cristal_count = store.get('count')['value']
+        return f"Cristaux : {cristal_count}"
 
     def get_cristaux(self):
         store = JsonStore(os.path.join('db', 'cristaux.json'))
@@ -178,79 +292,7 @@ class DeckScreen(MDScreen):
 
     def update_cristaux_label(self):
         cristal_count = self.get_cristaux()
-        self.cristaux_label.text = str(cristal_count)
-
-    def update_counters(self):
-        # Update cristal count from JsonStore
-        # (You might want to implement the logic for this if it's not already done)
-
-        # Update stars count from JsonStore
-        stars_store = JsonStore(os.path.join('db', 'stars.json'))
-        total_stars = sum([stars_store.get(key)["stars"] for key in stars_store.keys()])
-
-        self.stars_label.text = str(total_stars)
-
-    def on_enter(self, *args):
-        self.layout.clear_widgets()
-
-        # Top bar for counters
-        top_bar = MDBoxLayout(orientation='horizontal', size_hint=(.5, None), height=dp(50), spacing=dp(5))
-        self.layout.add_widget(top_bar)  # Assurez-vous de l'ajouter en premier pour qu'il soit en haut
-        
-        # Cristaux counter
-        crystal_icon = MDIconButton(icon="diamond-stone", font_size=dp(24), text_color="blue", theme_text_color="Custom")
-        self.cristaux_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
-        crystal_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
-        crystal_layout.add_widget(crystal_icon)
-        crystal_layout.add_widget(self.cristaux_label)
-        top_bar.add_widget(crystal_layout)
-
-        # Stars counter
-        star_icon = MDIconButton(icon="star", font_size=dp(24), text_color=(1, 0.84, 0, 1), theme_text_color="Custom")
-        self.stars_label = Label(text='0', font_size=dp(16), color=(0, 0, 0, 1))
-        star_layout = BoxLayout(orientation='horizontal', spacing=dp(5), size_hint_x = .1)
-
-        star_layout.add_widget(star_icon)
-        star_layout.add_widget(self.stars_label)
-        top_bar.add_widget(star_layout)
-
-
-        self.update_cristaux_label()
-        self.update_counters()
-
-
-        # Liste des tours achetées
-        bought_towers_store = JsonStore(os.path.join('db', 'tower_buy.json'))
-        self.bought_towers = []
-
-        self.bought_towers.append("Basique")
-        self.bought_towers2 = [key for key in bought_towers_store.keys() if bought_towers_store.get(key).get("bought")]
-
-        self.bought_towers = self.bought_towers + self.bought_towers2
-
-        # Créer une liste pour stocker les cases à cocher
-        self.checkboxes = []
-        
-        # Créer une section pour la sélection des tours
-        self.tower_selection_layout = BoxLayout(orientation='vertical', spacing=dp(10))
-        for tower in self.bought_towers:
-            tower_layout = BoxLayout(orientation='horizontal', spacing=dp(10))
-            checkbox = CheckBox(size_hint_x=None, width=dp(50), color=[0, 0, 0, 1])
-            checkbox.bind(active=self.check_tower_selection)
-            tower_label = Label(text=tower, size_hint_x=0.8, color=(0, 0, 0, 1))  # Texte en noir
-            # Cocher la case si la tour est déjà cochée dans le fichier JSON
-            if self.is_tower_checked(tower):
-                checkbox.active = True
-                
-            tower_layout.add_widget(checkbox)
-            tower_layout.add_widget(tower_label)
-            self.checkboxes.append(checkbox)
-            self.tower_selection_layout.add_widget(tower_layout)
-        self.layout.add_widget(self.tower_selection_layout)
-        
-        # Bouton pour sauvegarder la sélection
-        save_button = MDRaisedButton(text="Sauvegarder", on_release=self.save_deck)
-        self.layout.add_widget(save_button)
+        self.cristaux_label.text = f"Cristaux : {cristal_count}"
 
     def is_tower_checked(self, tower_name):
         """Return if the given tower is checked in the JSON."""
@@ -259,6 +301,148 @@ class DeckScreen(MDScreen):
             return False
         selected_towers = deck_store.get('selected_towers').get('towers', [])
         return tower_name in selected_towers
+    
+class TowerShopScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        
+        main_layout = BoxLayout(orientation='vertical')
+        
+        # Afficher le compteur de cristaux en haut
+        self.cristaux_label = Label(text=self.get_cristaux_str(), font_size=dp(16), size_hint_y=None, height=dp(50),  color="black")
+        main_layout.add_widget(self.cristaux_label)
+
+
+        # Création du ScrollView et du GridLayout pour les tours
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
+        layout = GridLayout(cols=3, spacing=10, padding=10, size_hint_y=None)
+        layout.bind(minimum_height=layout.setter('height'))
+        scroll_view.add_widget(layout)
+        main_layout.add_widget(scroll_view)
+
+        from reglages_tours import tours
+        img_directory = "tower_images/"
+        from kivy.uix.image import Image
+
+        for tower in tours:
+            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding = [dp(0),dp(5),dp(0),dp(5)], spacing=dp(5), elevation=3)
+            tower_layout = BoxLayout(orientation='vertical')
+            
+            # Image de la tour
+            tower_image_source = os.path.join(img_directory, f"tower_{tower['nom']}.png")
+            tower_image = Image(source=tower_image_source, size_hint=(.85, .85),pos_hint= {'center_x': .5, 'center_y': .5})
+            tower_layout.add_widget(tower_image)
+            
+            tower_info_layout = MDBoxLayout(orientation='vertical', pos_hint= {'center_x': .5, 'center_y': .5}, spacing=dp(2),adaptive_size=True)
+            if tower["nom"] == "Basique":  # Si la tour n'a pas été achetée, on passe à la suivante
+                continue
+            tower_name = tower["nom"]
+            tower_cost = tower["cristal_cost"]
+            
+            # Chaque tour aura trois éléments: nom, coût et bouton d'achat.
+            tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
+                                font_size=sp(8))
+
+            info_button = MDIconButton(icon="information-variant-circle-outline", icon_size= "18sp", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+            
+
+            if self.is_tower_bought(tower_name):
+                buy_button = MDLabel(text="")
+            else:
+                buy_button = MDFillRoundFlatIconButton(icon="diamond-stone", icon_size= "12sp", font_size= "12sp", text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+                #buy_button = MDRaisedButton(text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+                
+            
+            tower_layout.add_widget(tower_label)
+
+            tower_info_layout.add_widget(info_button)
+            tower_info_layout.add_widget(buy_button)
+
+            tower_layout.add_widget(tower_info_layout)
+            tower_card.add_widget(tower_layout)
+            layout.add_widget(tower_card)
+
+        
+
+        self.add_widget(main_layout)
+
+        # Bouton de retour
+        back_button = MDRaisedButton(text="Retour", on_release=self.return_to_main_menu, size_hint_y=None, height=dp(50))
+        main_layout.add_widget(back_button)
+
+    def return_to_main_menu(self, instance):
+        self.manager.current = 'worlds'  # Remplacez 'nom_de_l_ecran_principal' par le nom de votre écran principal
+
+    def buy_tower(self, tower_name, tower_cost, instance):
+        available_cristaux = self.get_cristaux()
+
+        if available_cristaux >= tower_cost:
+            # Mise à jour du compteur de cristaux
+            new_cristaux_count = available_cristaux - tower_cost
+            store_cristaux = JsonStore(os.path.join('db', 'cristaux.json'))
+            store_cristaux.put('count', value=new_cristaux_count)
+            self.update_cristaux_label()  # met à jour l'affichage du compteur
+
+            # Enregistrement de la tour achetée
+            store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
+            store_towers.put(tower_name, bought=True)
+
+            # (Optionnel) Affichage d'une notification à l'utilisateur
+            popup = Popup(title='Succès', content=Label(text=f"Tour achetée : \n\n {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
+            popup.open()
+        else:
+            # Affichage d'une erreur si l'utilisateur n'a pas assez de cristaux
+            popup = Popup(title='Erreur', content=Label(text="Vous n'avez pas assez de cristaux!"), size_hint=(0.9, 0.3))
+            popup.open()
+
+    def get_cristaux_str(self):
+        # Supposons que vous ayez une fonction pour obtenir le nombre de cristaux actuels de l'utilisateur.
+        # Je vais l'ajouter ici comme une simulation.
+        store = JsonStore(os.path.join('db', 'cristaux.json'))
+        if not store.exists('count'):
+            store.put('count', value=0)
+        cristal_count = store.get('count')['value']
+        return f"Cristaux : {cristal_count}"
+    
+    def get_cristaux(self):
+        store = JsonStore(os.path.join('db', 'cristaux.json'))
+        if not store.exists('count'):
+            store.put('count', value=0)
+        return store.get('count')['value']
+
+    def show_tower_info(self, tower, instance):
+        # Création du contenu du popup
+        content = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        content.add_widget(Label(text=f"Nom : {tower['nom']}"))
+        content.add_widget(Label(text=f"Coût en cristaux : {tower['cristal_cost']}"))
+        content.add_widget(Label(text=f"Degats phisiques : {tower['degats_physiques']}"))
+        content.add_widget(Label(text=f"Degats magiques : {tower['degats_magiques']}"))
+        content.add_widget(Label(text=f"Temps_entre_attaque : {tower['temps_entre_attaque']}"))
+        content.add_widget(Label(text=f"Range : {tower['range']}"))
+        content.add_widget(Label(text=f"Cout pièces : {tower['cost']}"))
+        content.add_widget(Label(text=f"Extra effect : {tower['extra_effect']}"))
+
+        # Bouton pour fermer le popup
+        close_button = MDRaisedButton(text="Fermer", size_hint_y=None, height=dp(50))
+        content.add_widget(close_button)
+
+        popup = Popup(title="Informations sur la tour", content=content, size_hint=(0.8, 0.8))
+        close_button.bind(on_release=popup.dismiss)  # fermer le popup lorsque le bouton est cliqué
+
+        popup.open()
+
+    def update_cristaux_label(self):
+        cristal_count = self.get_cristaux()
+        self.cristaux_label.text = f"Cristaux : {cristal_count}"
+
+    def is_tower_bought(self, tower_name):
+        store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
+        return store_towers.exists(tower_name)
+
+    def update_buy_button(self, tower_name, instance, *args):
+        if self.is_tower_bought(tower_name):
+            instance.parent.remove_widget(instance)
 
 class WorldScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -438,147 +622,6 @@ class MainMenu(Screen):
     # Nouvelle méthode pour retourner à l'écran de sélection de monde
     def return_to_world_selection(self, instance):
         self.manager.current = 'worlds'
-
-class TowerShopScreen(Screen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        
-        main_layout = BoxLayout(orientation='vertical')
-        
-        # Afficher le compteur de cristaux en haut
-        self.cristaux_label = Label(text=self.get_cristaux_str(), font_size=dp(16), size_hint_y=None, height=dp(50),  color="black")
-        main_layout.add_widget(self.cristaux_label)
-
-
-        # Création du ScrollView et du GridLayout pour les tours
-        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
-        layout = GridLayout(cols=4, spacing=10, padding=10, size_hint_y=None)
-        layout.bind(minimum_height=layout.setter('height'))
-        scroll_view.add_widget(layout)
-        main_layout.add_widget(scroll_view)
-
-        from reglages_tours import tours
-        img_directory = "tower_images/"
-        from kivy.uix.image import Image
-
-        for tower in tours:
-            tower_card = MDCard(size_hint=(.2, None), height=dp(150), style="outlined", line_color=(0.2, 0.2, 0.2, 1), padding = [dp(0),dp(5),dp(0),dp(5)], spacing=dp(5), elevation=3)
-            tower_layout = BoxLayout(orientation='vertical')
-            
-            # Image de la tour
-            tower_image_source = os.path.join(img_directory, f"tower_{tower['nom']}.png")
-            tower_image = Image(source=tower_image_source, size_hint=(.85, .85),pos_hint= {'center_x': .5, 'center_y': .5})
-            tower_layout.add_widget(tower_image)
-            
-            tower_info_layout = MDBoxLayout(orientation='vertical', pos_hint= {'center_x': .5, 'center_y': .5}, spacing=dp(2),adaptive_size=True)
-            if tower["nom"] == "Basique":  # Si la tour n'a pas été achetée, on passe à la suivante
-                continue
-            tower_name = tower["nom"]
-            tower_cost = tower["cristal_cost"]
-            
-            # Chaque tour aura trois éléments: nom, coût et bouton d'achat.
-            tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
-                                font_size=sp(8))
-
-            info_button = MDIconButton(icon="information-variant-circle-outline", icon_size= "18sp", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
-            
-
-            if self.is_tower_bought(tower_name):
-                buy_button = MDLabel(text="")
-            else:
-                buy_button = MDFillRoundFlatIconButton(icon="diamond-stone", icon_size= "12sp", font_size= "12sp", text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
-                #buy_button = MDRaisedButton(text=str(tower_cost), on_release=partial(self.buy_tower, tower_name, tower_cost),height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
-                
-            
-            tower_layout.add_widget(tower_label)
-
-            tower_info_layout.add_widget(info_button)
-            tower_info_layout.add_widget(buy_button)
-
-            tower_layout.add_widget(tower_info_layout)
-            tower_card.add_widget(tower_layout)
-            layout.add_widget(tower_card)
-
-        
-
-        self.add_widget(main_layout)
-
-        # Bouton de retour
-        back_button = MDRaisedButton(text="Retour", on_release=self.return_to_main_menu, size_hint_y=None, height=dp(50))
-        main_layout.add_widget(back_button)
-
-    def return_to_main_menu(self, instance):
-        self.manager.current = 'worlds'  # Remplacez 'nom_de_l_ecran_principal' par le nom de votre écran principal
-
-    def buy_tower(self, tower_name, tower_cost, instance):
-        available_cristaux = self.get_cristaux()
-
-        if available_cristaux >= tower_cost:
-            # Mise à jour du compteur de cristaux
-            new_cristaux_count = available_cristaux - tower_cost
-            store_cristaux = JsonStore(os.path.join('db', 'cristaux.json'))
-            store_cristaux.put('count', value=new_cristaux_count)
-            self.update_cristaux_label()  # met à jour l'affichage du compteur
-
-            # Enregistrement de la tour achetée
-            store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
-            store_towers.put(tower_name, bought=True)
-
-            # (Optionnel) Affichage d'une notification à l'utilisateur
-            popup = Popup(title='Succès', content=Label(text=f"Tour achetée : \n\n {tower_name}!"), size_hint=(0.6, 0.4), on_dismiss=partial(self.update_buy_button, tower_name, instance))
-            popup.open()
-        else:
-            # Affichage d'une erreur si l'utilisateur n'a pas assez de cristaux
-            popup = Popup(title='Erreur', content=Label(text="Vous n'avez pas assez de cristaux!"), size_hint=(0.9, 0.3))
-            popup.open()
-
-    def get_cristaux_str(self):
-        # Supposons que vous ayez une fonction pour obtenir le nombre de cristaux actuels de l'utilisateur.
-        # Je vais l'ajouter ici comme une simulation.
-        store = JsonStore(os.path.join('db', 'cristaux.json'))
-        if not store.exists('count'):
-            store.put('count', value=0)
-        cristal_count = store.get('count')['value']
-        return f"Cristaux : {cristal_count}"
-    
-    def get_cristaux(self):
-        store = JsonStore(os.path.join('db', 'cristaux.json'))
-        if not store.exists('count'):
-            store.put('count', value=0)
-        return store.get('count')['value']
-
-    def show_tower_info(self, tower, instance):
-        # Création du contenu du popup
-        content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        content.add_widget(Label(text=f"Nom : {tower['nom']}"))
-        content.add_widget(Label(text=f"Coût en cristaux : {tower['cristal_cost']}"))
-        content.add_widget(Label(text=f"Degats phisiques : {tower['degats_physiques']}"))
-        content.add_widget(Label(text=f"Degats magiques : {tower['degats_magiques']}"))
-        content.add_widget(Label(text=f"Temps_entre_attaque : {tower['temps_entre_attaque']}"))
-        content.add_widget(Label(text=f"Range : {tower['range']}"))
-        content.add_widget(Label(text=f"Cout pièces : {tower['cost']}"))
-
-        # Bouton pour fermer le popup
-        close_button = MDRaisedButton(text="Fermer", size_hint_y=None, height=dp(50))
-        content.add_widget(close_button)
-
-        popup = Popup(title="Informations sur la tour", content=content, size_hint=(0.8, 0.8))
-        close_button.bind(on_release=popup.dismiss)  # fermer le popup lorsque le bouton est cliqué
-
-        popup.open()
-
-    def update_cristaux_label(self):
-        cristal_count = self.get_cristaux()
-        self.cristaux_label.text = f"Cristaux : {cristal_count}"
-
-    def is_tower_bought(self, tower_name):
-        store_towers = JsonStore(os.path.join('db', 'tower_buy.json'))
-        return store_towers.exists(tower_name)
-
-    def update_buy_button(self, tower_name, instance, *args):
-        if self.is_tower_bought(tower_name):
-            instance.parent.remove_widget(instance)
 
 class GameScreen(Screen):
     def __init__(self, **kwargs):

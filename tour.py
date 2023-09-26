@@ -6,7 +6,7 @@ from kivy.clock import Clock, partial
 
 from monstres import Monstre
 from reglages_tours import tour_dict
-from projectile import Projectile, IceProjectile, FireProjectile
+from projectile import Projectile, IceProjectile, FireProjectile, ElecProjectile
 
 from kivymd.uix.button import MDIconButton
 
@@ -144,8 +144,11 @@ class Tour(Widget):
 
                 if self.name == "Ice":
                     projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
-                if self.name == "Fire":
+                elif self.name == "Fire":
                     projectile = FireProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                elif self.name == "Elec":
+                    projectile = ElecProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                
                 else:
                     projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
                     #print("self.degats_physiques", self.degats_physiques)
