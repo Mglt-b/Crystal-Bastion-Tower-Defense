@@ -88,10 +88,6 @@ class Tour(Widget):
         self.range_circle = None
 
 
-        self.button_layout = FloatLayout(size=self.size, pos=self.pos)
-        self.add_widget(self.button_layout)
-
-
     def get_current_talents(self):
         # Lisez les talents depuis le fichier JSON et retournez-les sous forme de dictionnaire
         talent_store = JsonStore("db/talent.json")
@@ -245,52 +241,31 @@ class Tour(Widget):
         
         # Ajoutez-la à nouveau pour garantir qu'elle soit au-dessus
         parent.add_widget(self)
-        
         print(self.parent.parent.parent.width)
 
-        if self.x < (self.parent.parent.parent.width * .8):
             
 
-            # Logique pour afficher les boutons X et UP à côté de la tour
-            if not self.x_button:
+        # Logique pour afficher les boutons X et UP à côté de la tour
+        if not self.x_button:
 
-                self.x_button = MDIconButton(icon_size="20sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x + self.width, self.y), opacity=.8)
-                self.x_button.bind(on_release=self.remove_tour)
-                self.button_layout.add_widget(self.x_button, index=0)
-            
-            if not self.up_button:
-                self.up_button = MDIconButton(icon_size="20sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
-                                              pos=(self.x + self.width, self.y + self.x_button.height), opacity=.8)
-                self.up_button.bind(on_release=self.upgrade_tour)
-                self.button_layout.add_widget(self.up_button, index=0)
+            self.x_button = MDIconButton(icon_size="10sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x, self.y), opacity=1)
+            self.x_button.bind(on_release=self.remove_tour)
+            self.add_widget(self.x_button, index=0)
+        
+        if not self.up_button:
+            self.up_button = MDIconButton(icon_size="10sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
+                                            pos=(self.x, self.y + self.x_button.height/1.3), opacity=1)
+            self.up_button.bind(on_release=self.upgrade_tour)
+            self.add_widget(self.up_button, index=0)
 
-            if not self.del_button:
-                self.del_button = MDIconButton(icon_size="20sp",icon="eye-off",md_bg_color= (0,1,.6,1),
-                                               pos=(self.x + self.width, self.y + self.x_button.height*2), opacity=.8)
-                self.del_button.bind(on_release=self.hidden_buttons_tour)
-                self.button_layout.add_widget(self.del_button, index=0)
+        if not self.del_button:
+            self.del_button = MDIconButton(icon_size="10sp",icon="eye-off",md_bg_color= (0,1,.6,1),
+                                            pos=(self.x, self.y + (self.x_button.height/1.3)*2), opacity=1)
+            self.del_button.bind(on_release=self.hidden_buttons_tour)
+            self.add_widget(self.del_button, index=0)
 
 
-        else:
 
-            # Logique pour afficher les boutons X et UP à côté de la tour
-            if not self.x_button:
-
-                self.x_button = MDIconButton(icon_size="10sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x - self.width*2, self.y), opacity=.8)
-                self.x_button.bind(on_release=self.remove_tour)
-                self.button_layout.add_widget(self.x_button, index=0)
-            
-            if not self.up_button:
-                self.up_button = MDIconButton(icon_size="10sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
-                                              pos=(self.x - self.width*2, self.y + self.x_button.height), opacity=.8)
-                self.up_button.bind(on_release=self.upgrade_tour)
-                self.button_layout.add_widget(self.up_button, index=0)
-
-            if not self.del_button:
-                self.del_button = MDIconButton(icon_size="10sp",icon="eye-off",md_bg_color= (0,1,.6,1),
-                                               pos=(self.x - self.width*2, self.y + self.x_button.height*2), opacity=.8)
-                self.del_button.bind(on_release=self.hidden_buttons_tour)
-                self.button_layout.add_widget(self.del_button, index=0)
 
     def remove_tour(self, instance):
         # Stockez une référence à l'objet parent

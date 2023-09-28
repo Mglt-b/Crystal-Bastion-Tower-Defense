@@ -557,6 +557,22 @@ class MainMenu(Screen):
 
 
     def start_level(self, niveau):
+        # Vérifiez si le fichier existe et s'il est vide
+        file_path = os.path.join('db', 'tower_deck.json')
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            # Le fichier n'existe pas ou est vide, créez le fichier et ajoutez "Basique"
+            store = JsonStore(file_path)
+            store.put('selected_towers', towers=["Basique"])
+            # Ici, vous pouvez également ajouter une alerte pour l'utilisateur si nécessaire
+        else:
+            # Le fichier existe, vérifiez s'il contient des tours
+            store = JsonStore(file_path)
+            selected_towers = store.get('selected_towers').get('towers', [])
+            if not selected_towers:
+                # Aucune tour n'est sélectionnée, ajoutez "Basique"
+                store.put('selected_towers', towers=["Basique"])
+                # Ici aussi, vous pouvez ajouter une alerte pour l'utilisateur si nécessaire
+
         # Logic to start the chosen level
         self.manager.current = 'game'
         self.manager.get_screen('game').start_game(niveau)
@@ -585,7 +601,7 @@ class MainMenu(Screen):
             button_text = "Niveau " + str(level_id)
             
             # Create a horizontal layout for each level
-            level_layout = BoxLayout(orientation='horizontal', spacing=dp(10), height=dp(20))
+            level_layout = BoxLayout(orientation='horizontal', spacing=dp(5), height=dp(20))
 
             if level_id <= highest_completed_level:
                 button = MDRaisedButton(text=button_text)
@@ -611,6 +627,11 @@ class MainMenu(Screen):
                     star = MDIconButton(icon="star", font_size=dp(20), theme_text_color="Secondary", opacity = .5)  # Grey star
                 level_layout.add_widget(star)
 
+            if 3 < stars_earned:
+                star = MDIconButton(icon="star", font_size=dp(20), text_color="purple", theme_text_color="Custom")  # Gold star
+            else:
+                star = MDIconButton(icon="star", font_size=dp(20), theme_text_color="Secondary", opacity = .1)  # Grey star
+            level_layout.add_widget(star)
             layout.add_widget(level_layout)
 
         # Create a horizontal layout for back
@@ -658,7 +679,6 @@ class GameScreen(Screen):
         self.niveau = self.niveau
         self.map_zone = MapZone(self.niveau)
         self.add_widget(self.map_zone)
-        # TODO: Further logic to initialize and start the level
 
 class MenuApp(MDApp):
     def build(self):

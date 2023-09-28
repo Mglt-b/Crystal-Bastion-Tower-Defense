@@ -401,9 +401,7 @@ class Monstre(Widget):
 
         app = App.get_running_app()
         if not app.game_win_popup_shown:
-            app.game_win_popup_shown = True
-            self.show_win_popup()
-            print("game win")
+
 
             # Utilisez JsonStore pour enregistrer la progression
             progress_store = JsonStore(os.path.join('db', 'progress.json'))
@@ -446,6 +444,16 @@ class Monstre(Widget):
 
                 # Marquer le niveau comme complété pour la première fois
                 first_complete_store.put(level_id, completed=True)
+
+                app.game_win_popup_shown = True
+                self.show_win_popup()
+                print("Game win \n First Complete \n +30 cristaux")
+            
+            else:
+
+                app.game_win_popup_shown = True
+                self.show_win_popup()
+                print("Game win")
        
     def dead_monster(self):
         if self.parent:
