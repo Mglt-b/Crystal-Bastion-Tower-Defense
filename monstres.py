@@ -47,6 +47,7 @@ class Monstre(Widget):
         #print("Initialisation d'un nouveau monstre de type :", type_monstre)
         
         self.register_event_type('on_monster_death')
+        self.is_alive = True
 
         # Store map size
         self.map_size = map_size
@@ -118,6 +119,8 @@ class Monstre(Widget):
         self.add_widget(self.elec_effect)
         self.elected = False  # New property to track if the monster is slowed
 
+        #for Bomb tower
+        self.has_bomb = False
 
         # Start moving
         self.move()
@@ -126,6 +129,12 @@ class Monstre(Widget):
         anim.repeat = True
         anim.start(self)
         self.bind(angle=self.on_angle)
+
+    def is_out_of_screen(self):
+        if self.current_target_idx >= len(self.path):
+            return True
+        else:
+            return False
 
     def update_rotation_origin(self, instance, value):
         self.rotation.origin = value
@@ -153,8 +162,6 @@ class Monstre(Widget):
         self.freeze_effect.opacity = 0  # Hide the freeze effect
         self.monster_image.opacity = 1
 
-
-
     def update_elec_effect_position(self):
         # Center the freeze effect on the monster
         self.freeze_effect.center = self.center
@@ -174,9 +181,6 @@ class Monstre(Widget):
         self.speed = original_speed
         self.elec_effect.opacity = 0  # Hide the freeze effect
         self.monster_image.opacity = 1
-
-
-
 
     def update_burn_effect_position(self):
         # Center the freeze effect on the monster
@@ -228,6 +232,7 @@ class Monstre(Widget):
             Color(0, 1, 0, 1)  # Vert
 
         if self.health < 1 :
+            self.is_alive = False
             self.dead_monster()
 
     def move(self):
@@ -253,17 +258,17 @@ class Monstre(Widget):
 
                     #si monstre au bout du path, perd vie
 
-                    print("perd vie")
+                    #print("perd vie")
                     map_zone.lives -= 1
                     map_zone.lives_label.text = f'Vies: {map_zone.lives}'
                     
                     map_zone.current_monsters -= 1
                     map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
-                    print("monstre fin path, retiré, count :",map_zone.current_monsters)
+                    #print("monstre fin path, retiré, count :",map_zone.current_monsters)
 
                     map_zone.programmed_monster -= 1
 
-                    print('map_zone.lives', map_zone.lives)
+                    #print('map_zone.lives', map_zone.lives)
                     if map_zone.lives <= 0:
                         self.game_over()  # This function needs to be implemented to handle game over logic
 
@@ -310,13 +315,13 @@ class Monstre(Widget):
 
             #supprime les enfants
             for child in map_zone.children[:]:
-                print(child)
+                #print(child)
                 map_zone.remove_widget(child)
 
             #supprime les monstres programmés
             for event in map_zone.scheduled_monster_events:
                 Clock.unschedule(event)
-                print("unshedule : ", event)
+                #print("unshedule : ", event)
             map_zone.scheduled_monster_events.clear()  # videz la liste
 
             #supprime le canvas
@@ -355,7 +360,7 @@ class Monstre(Widget):
 
             #supprime les enfants
             for child in map_zone.children[:]:
-                print(child)
+                #print(child)
                 map_zone.remove_widget(child)
 
             map_zone.scheduled_monster_events.clear()  # videz la liste
@@ -442,10 +447,9 @@ class Monstre(Widget):
                 # Marquer le niveau comme complété pour la première fois
                 first_complete_store.put(level_id, completed=True)
        
-
     def dead_monster(self):
         if self.parent:
-            print("'dead_monster' parent : ", self.parent, "widget delete : ", self)
+            #print("'dead_monster' parent : ", self.parent, "widget delete : ", self)
             self.parent.remove_widget(self)  # Supprime le monstre
             self.dispatch('on_monster_death', self.coin_value)
 
@@ -455,20 +459,20 @@ class Monstre(Widget):
             map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
 
             map_zone.current_monsters -= 1
-            print("map_zone.current_monsters", map_zone.current_monsters)
+            #print("map_zone.current_monsters", map_zone.current_monsters)
             map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
 
             map_zone.programmed_monster -= 1
             
             if map_zone.lives > 0 and map_zone.programmed_monster == 0 and map_zone.current_monsters == 0: 
-                print("game_win called")
+                #print("game_win called")
                 self.game_win()
             
     def on_monster_death(self, *args):
         parent_reference = self.parent
         self.animate_coin_to_counter(parent_reference)
         if parent_reference and self in parent_reference.children:
-            print("'on_monster_death' parent : ", parent_reference, "widget delete : ", self)
+            #print("'on_monster_death' parent : ", parent_reference, "widget delete : ", self)
             parent_reference.remove_widget(self)
 
     def on_pos(self, *args):
@@ -497,18 +501,19 @@ class Monstre(Widget):
                 map_zone.pieces_label.y + map_zone.pieces_label.height/2)
 
         def on_animation_progress(animation, coin_instance, progression):
-            print(coin_instance, f"Progression: {progression}, Position: {coin_instance.pos}")
+            #print(coin_instance, f"Progression: {progression}, Position: {coin_instance.pos}")
+            pass
 
         # À la fin de l'animation, supprimez la pièce de map_zone et mettez à jour le nombre de pièces
         def on_animation_complete(animation, coin_instance):
             map_zone.coins += coin.value
             map_zone.pieces_label.text = f"Pièces: {map_zone.coins}"
             map_zone.remove_widget(coin_instance)
-            print("Animation complete!")
+            #print("Animation complete!")
 
         # Créez une animation pour déplacer la pièce vers le label "Pièces"
         animation = Animation(center=end_pos, duration=0.25)
-        print("animate coin from :", self.pos, "to :",end_pos)
+        #print("animate coin from :", self.pos, "to :",end_pos)
         animation.bind(on_progress=on_animation_progress)
         animation.bind(on_complete=on_animation_complete)
         animation.start(coin)

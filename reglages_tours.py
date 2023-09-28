@@ -51,7 +51,7 @@ tours = [
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
-        'cristal_cost':500,
+        'cristal_cost':50,
         'extra_effect': "Snare"
     },
     ##############################################################
@@ -85,14 +85,14 @@ tours = [
         "nom": "Bomb",
         "degats_physiques": 0,  # ou un autre nombre approprié
         "degats_magiques": 0,
-        "temps_entre_attaque": 1,  # ou un autre nombre approprié
+        "temps_entre_attaque": 3,  # ou un autre nombre approprié
         "taille": (dp(50), dp(50)),
         "couleur": [0.5, 0.5, 1, 1],  # Bleu clair
         "range": dp(100),  # ou un autre nombre approprié
         "projectile_color": [0.5, 0.5, 1, 1],  # Bleu clair
         'cost': 60,
         'cristal_cost':0,
-        'extra_effect': "Bomb"  
+        'extra_effect': f"Bomb explode after 5s,\n 25/25 damage and range {dp(20)}"
     },
     {
         "nom": "test2",

@@ -6,7 +6,7 @@ from kivy.clock import Clock, partial
 
 from monstres import Monstre
 from reglages_tours import tour_dict
-from projectile import Projectile, IceProjectile, FireProjectile, ElecProjectile
+from projectile import Projectile, IceProjectile, FireProjectile, ElecProjectile, BombProjectile
 
 from kivymd.uix.button import MDIconButton
 
@@ -18,6 +18,7 @@ from kivy.metrics import dp, sp
 
 import math
 from kivy.storage.jsonstore import JsonStore
+from kivy.uix.floatlayout import FloatLayout
 
 def calculate_angle(source, target):
     dx = target[0] - source[0]
@@ -27,6 +28,7 @@ def calculate_angle(source, target):
 class Tour(Widget):
     color = ListProperty([1, 1, 1, 1])  # Par défaut blanc
     dragging = False
+    
 
     def __init__(self, tour_name, size, color=[1, 1, 1, 1], **kwargs):  # tour_type est l'index de la tour dans reglages_tours.py
         super().__init__(**kwargs)
@@ -85,6 +87,11 @@ class Tour(Widget):
 
         self.range_circle = None
 
+
+        self.button_layout = FloatLayout(size=self.size, pos=self.pos)
+        self.add_widget(self.button_layout)
+
+
     def get_current_talents(self):
         # Lisez les talents depuis le fichier JSON et retournez-les sous forme de dictionnaire
         talent_store = JsonStore("db/talent.json")
@@ -130,6 +137,7 @@ class Tour(Widget):
 
     def _attack(self, dt):
         # Trouver le monstre le plus proche (vous pouvez ajuster cette logique si nécessaire)
+        
         closest_monster = self.find_closest_monster()
 
         # Si un monstre est à portée, attaquez-le
@@ -148,15 +156,12 @@ class Tour(Widget):
                     projectile = FireProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
                 elif self.name == "Elec":
                     projectile = ElecProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
-                
+                elif self.name == "Bomb":
+                    projectile = BombProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    closest_monster.has_bomb = True
                 else:
                     projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
-                    #print("self.degats_physiques", self.degats_physiques)
-                    #print("self.degats_magiques", self.degats_magiques)
-                    
 
-                #print(f"Projectile created with speed: {projectile.speed}")  # Pour le débogage
-                #print('Projectile created and added to parent.', self, dt)
                 self.parent.add_widget(projectile)
 
     def distance(self, p1, p2):
@@ -176,7 +181,7 @@ class Tour(Widget):
         
         for child in self.parent.children:
  
-            if isinstance(child, Monstre):
+            if isinstance(child, Monstre) and not child.has_bomb and not child.slowed and not child.burned and not child.elected:
                 
                 #print("################################")
                 #print('demande de calcul de distance :')
@@ -199,7 +204,7 @@ class Tour(Widget):
 
         #print('Closest monster found:', closest_monster)
         return closest_monster
-        
+
     def on_touch_up(self, touch):
         if not self.active:
             return super().on_touch_up(touch)
@@ -211,8 +216,36 @@ class Tour(Widget):
             return True
         return super().on_touch_up(touch)
 
-    def show_buttons(self):
+    def on_touch_down(self, touch):
+        # Appeler le super pour s'assurer que tous les événements tactiles sont capturés
+        super().on_touch_down(touch)
 
+        print("on touch down called :")
+
+        # Vérifiez si l'un des boutons est affiché
+        if self.x_button or self.up_button or self.del_button:
+            # Vérifiez si le toucher est sur l'un des boutons
+            if (self.x_button and self.x_button.collide_point(*touch.pos)) or \
+            (self.up_button and self.up_button.collide_point(*touch.pos)) or \
+            (self.del_button and self.del_button.collide_point(*touch.pos)):
+                # Si le toucher est sur l'un des boutons, retournez simplement
+                print("c'est un bouton")
+                return
+            else:
+                # Si le toucher est en dehors des boutons, cachez-les
+                print("c'est pas un bouton")
+                self.hidden_buttons_tour(None)
+
+
+
+    def show_buttons(self):
+        # Tout d'abord, retirez la tour de son parent
+        parent = self.parent
+        parent.remove_widget(self)
+        
+        # Ajoutez-la à nouveau pour garantir qu'elle soit au-dessus
+        parent.add_widget(self)
+        
         print(self.parent.parent.parent.width)
 
         if self.x < (self.parent.parent.parent.width * .8):
@@ -221,19 +254,21 @@ class Tour(Widget):
             # Logique pour afficher les boutons X et UP à côté de la tour
             if not self.x_button:
 
-                self.x_button = MDIconButton(icon_size="20sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x + self.width, self.y))
+                self.x_button = MDIconButton(icon_size="20sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x + self.width, self.y), opacity=.8)
                 self.x_button.bind(on_release=self.remove_tour)
-                self.add_widget(self.x_button)
+                self.button_layout.add_widget(self.x_button, index=0)
             
             if not self.up_button:
-                self.up_button = MDIconButton(icon_size="20sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),pos=(self.x + self.width, self.y + self.x_button.height))
+                self.up_button = MDIconButton(icon_size="20sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
+                                              pos=(self.x + self.width, self.y + self.x_button.height), opacity=.8)
                 self.up_button.bind(on_release=self.upgrade_tour)
-                self.add_widget(self.up_button)
+                self.button_layout.add_widget(self.up_button, index=0)
 
             if not self.del_button:
-                self.del_button = MDIconButton(icon_size="20sp",icon="eye-off",md_bg_color= (0,1,.6,1),pos=(self.x + self.width, self.y + self.x_button.height*2))
+                self.del_button = MDIconButton(icon_size="20sp",icon="eye-off",md_bg_color= (0,1,.6,1),
+                                               pos=(self.x + self.width, self.y + self.x_button.height*2), opacity=.8)
                 self.del_button.bind(on_release=self.hidden_buttons_tour)
-                self.add_widget(self.del_button)
+                self.button_layout.add_widget(self.del_button, index=0)
 
 
         else:
@@ -241,19 +276,21 @@ class Tour(Widget):
             # Logique pour afficher les boutons X et UP à côté de la tour
             if not self.x_button:
 
-                self.x_button = MDIconButton(icon_size="10sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x - self.width*2, self.y))
+                self.x_button = MDIconButton(icon_size="10sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x - self.width*2, self.y), opacity=.8)
                 self.x_button.bind(on_release=self.remove_tour)
-                self.add_widget(self.x_button)
+                self.button_layout.add_widget(self.x_button, index=0)
             
             if not self.up_button:
-                self.up_button = MDIconButton(icon_size="10sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),pos=(self.x - self.width*2, self.y + self.x_button.height))
+                self.up_button = MDIconButton(icon_size="10sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
+                                              pos=(self.x - self.width*2, self.y + self.x_button.height), opacity=.8)
                 self.up_button.bind(on_release=self.upgrade_tour)
-                self.add_widget(self.up_button)
+                self.button_layout.add_widget(self.up_button, index=0)
 
             if not self.del_button:
-                self.del_button = MDIconButton(icon_size="10sp",icon="eye-off",md_bg_color= (0,1,.6,1),pos=(self.x - self.width*2, self.y + self.x_button.height*2))
+                self.del_button = MDIconButton(icon_size="10sp",icon="eye-off",md_bg_color= (0,1,.6,1),
+                                               pos=(self.x - self.width*2, self.y + self.x_button.height*2), opacity=.8)
                 self.del_button.bind(on_release=self.hidden_buttons_tour)
-                self.add_widget(self.del_button)
+                self.button_layout.add_widget(self.del_button, index=0)
 
     def remove_tour(self, instance):
         # Stockez une référence à l'objet parent

@@ -57,7 +57,7 @@ class TalentScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        main_scroll0 = BoxLayout(orientation='vertical', size_hint=(1, .9), pos_hint= {'top': 1, 'top': 1})
+        main_scroll0 = BoxLayout(orientation='vertical', size_hint=(1, .92), pos_hint= {'top': 1, 'top': 1})
         main_scroll = ScrollView(do_scroll_x=False)
         main_scroll0.add_widget(main_scroll)
         
@@ -72,7 +72,11 @@ class TalentScreen(Screen):
         # Initialisez le dictionnaire pour stocker les labels des talents
         self.talent_labels = {}
         # Liste des talents
-        self.talents = ["ATK speed", "Physical ATK", "Magiq ATK", "ATK range", "Ice snare long","Ice snare speed", "Fire damage", "Elec root", " Bomb damage", "Life points"]
+        self.talents = ["ATK speed", "Physical ATK", "Magiq ATK", "ATK range",
+                         "Ice snare long","Ice snare speed", 
+                         "Fire dot damage", "Fire dot speed",
+                          "Elec root", "Life points",
+                           "Bomb_damage", "Bomb_range", "Bomb_delay"]
 
         # Lire la valeur totale des étoiles
         self.star_count = self.get_stars_from_json()
@@ -91,7 +95,10 @@ class TalentScreen(Screen):
             talent_layout = BoxLayout(size_hint=(1, 1),spacing=dp(5))
             
             talent_value = self.get_talent_value(talent)
-            talent_label = MDLabel(text=f"{talent}:\n+{talent_value}%", size_hint_x=0.6, color="black")
+            if str(talent) == "Life points":
+                talent_label = MDLabel(text=f"{talent}:\n+{talent_value} life", size_hint_x=0.6, color="black")
+            else:
+                talent_label = MDLabel(text=f"{talent}:\n+{talent_value}%", size_hint_x=0.6, color="black")
             
             # Stocker une référence au label dans le dictionnaire
             self.talent_labels[talent] = talent_label
