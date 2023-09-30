@@ -108,8 +108,9 @@ class TalentScreen(Screen):
             subtract_button = MDRaisedButton(text="-", on_release=lambda x, t=talent: self.modify_talent(t, -1))
             
             talent_layout.add_widget(talent_label)
-            talent_layout.add_widget(add_button)
             talent_layout.add_widget(subtract_button)
+            talent_layout.add_widget(add_button)
+
             
             talent_card.add_widget(talent_layout)
             main_layout.add_widget(talent_card)
