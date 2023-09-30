@@ -23,6 +23,7 @@ from kivy.graphics import Rotate
 from kivy.graphics import PushMatrix, PopMatrix
 
 from kivy.storage.jsonstore import JsonStore
+from math import atan2, degrees
 
 class Coin(Widget):
     def __init__(self,value, **kwargs):
@@ -58,6 +59,8 @@ class Monstre(Widget):
         self.armure = type_monstre["armure"]
         self.magique_resistance = type_monstre["magique_resistance"]
         self.vie_max = self.health
+        
+        self.rotation_behavior = type_monstre["rotation_behavior"] #rotation type
 
         self.coin_value = type_monstre["coin"]
 
@@ -122,13 +125,17 @@ class Monstre(Widget):
         #for Bomb tower
         self.has_bomb = False
 
-        # Start moving
-        self.move()
-        anim = Animation(angle=360, duration=1)
-        anim += Animation(angle=0, duration=0)
-        anim.repeat = True
-        anim.start(self)
-        self.bind(angle=self.on_angle)
+        if self.rotation_behavior == "fixed":
+            # Start moving
+            self.move()
+            anim = Animation(angle=360, duration=1)
+            anim += Animation(angle=0, duration=0)
+            anim.repeat = True
+            anim.start(self)
+            self.bind(angle=self.on_angle)
+        elif self.rotation_behavior == "path_direction":
+            # Déplacez simplement le monstre sans l'animation continue
+            self.move()
 
     def is_out_of_screen(self):
         if self.current_target_idx >= len(self.path):
@@ -214,7 +221,7 @@ class Monstre(Widget):
         # Somme des dégâts réels
         total_damage = degats_reels_physiques + degats_reels_magiques
 
-        print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
+        #print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
         
         self.health -= total_damage
 
@@ -293,6 +300,38 @@ class Monstre(Widget):
         # Update graphics
         #self.monster_image.pos = self.pos
         self.monster_image.pos = (self.center_x - self.monster_image.size[0]/2, self.center_y - self.monster_image.size[1]/2)
+
+        # Update rotation
+        if self.rotation_behavior == "path_direction":
+            # Prendre le segment actuel et le suivant du chemin
+            current_point = self.path[self.current_target_idx - 1]
+            next_point = self.path[self.current_target_idx]
+
+            # Calculer les différences en x et en y
+            delta_x = next_point[0] - current_point[0]
+            delta_y = next_point[1] - current_point[1]
+
+            # Obtenir l'angle en radians
+            angle_rad = atan2(delta_y, delta_x)
+            
+            # Convertir l'angle en degrés
+            angle_deg = degrees(angle_rad) - 90  # Soustraire 90 pour que l'image orientée à gauche soit correctement orientée
+            
+            # Appliquer l'effet miroir si nécessaire
+            if 90 <= angle_deg <= 270:  # Ajustez ces valeurs selon vos besoins
+                self.monster_image.scale_x = -1
+            else:
+                self.monster_image.scale_x = 1
+
+            self.rotation.angle = angle_deg
+
+            # Mettre à jour l'origine de la rotation pour qu'elle soit centrée sur le monstre
+            self.rotation.origin = self.center
+
+
+
+        elif self.rotation_behavior == "fixed":
+            pass  # Pas de rotation basée sur le chemin
 
         # Schedule next move
         Clock.schedule_once(lambda dt: self.move(), 0.1)
@@ -412,31 +451,29 @@ class Monstre(Widget):
             game_screen = root_widget.get_screen('game')
             map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
             level_id = str(map_zone.actual_level)  # Convertir en chaîne pour utiliser comme clé; remplacez par la logique appropriée pour obtenir l'ID du niveau
-            
+
             progress_store.put(level_id, completed=True)
-            
+
             # Conditions fictives pour déterminer le nombre d'étoiles obtenues
             stars_earned = 1
 
-            #get life points = "map_zone.lives"
-            root_widget = App.get_running_app().root
-            map_zone = root_widget.get_screen('game').map_zone  # Accédez directement à map_zone via la référence root_widget
-            
-            condition_for_3_stars = False # a coder
-
-
+            # Get life points = "map_zone.lives"
             if map_zone.lives >= 15:  # terminer le niveau avec >= 15 points de vie
                 stars_earned += 1
             if map_zone.lives == 20:  # terminer le niveau avec 20 points de vie
                 stars_earned += 1
-            
-            # Stocker le nombre d'étoiles obtenues dans le fichier JSON
-            stars_store.put(level_id, stars=stars_earned)
 
-            # Utilisez JsonStore pour vérifier si le niveau a été complété pour la première fois
+            # Vérifiez si un record d'étoiles existe pour ce niveau
+            previous_stars = 0  # Valeur par défaut
+            if stars_store.exists(level_id):
+                previous_stars = stars_store.get(level_id)['stars']
+
+            # Si le nombre d'étoiles gagnées est supérieur ou égal au record précédent, mettez à jour le record
+            if stars_earned >= previous_stars:
+                stars_store.put(level_id, stars=stars_earned)
+
             first_complete_store = JsonStore(os.path.join('db', 'first_complete_level.json'))
-
-            if not first_complete_store.exists(level_id):  # Si le niveau n'a pas encore été complété pour la première fois
+            if not first_complete_store.exists(level_id):  
                 # Ajouter 30 cristaux à l'utilisateur
                 cristal_store = JsonStore(os.path.join('db', 'cristaux.json'))
                 current_cristal_count = cristal_store.get('count')['value']
@@ -448,13 +485,11 @@ class Monstre(Widget):
                 app.game_win_popup_shown = True
                 self.show_win_popup()
                 print("Game win \n First Complete \n +30 cristaux")
-            
             else:
-
                 app.game_win_popup_shown = True
                 self.show_win_popup()
                 print("Game win")
-       
+
     def dead_monster(self):
         if self.parent:
             #print("'dead_monster' parent : ", self.parent, "widget delete : ", self)

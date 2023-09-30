@@ -12,7 +12,8 @@ monstre_configurations = {
         "health": 100,
         "armure": 20,
         "magique_resistance": 10, 
-        "coin": 10
+        "coin": 10,
+        "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
     },
     "rapide": {
         "name": "Rapide",
@@ -22,7 +23,8 @@ monstre_configurations = {
         "health": 50,
         "armure": 5,
         "magique_resistance": 0, 
-        "coin": 10
+        "coin": 10,
+        "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
     },
     "tank": {
         "name": "Tank",
@@ -32,7 +34,41 @@ monstre_configurations = {
         "health": 500,
         "armure": 100,
         "magique_resistance": 0, 
-        "coin": 50
+        "coin": 50,
+        "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+    },
+    "ghost": {
+        "name": "Ghost",
+        "image": "monstre_Ghost.png",
+        "size": (dp(30), dp(30)),
+        "speed": 10,
+        "health": 200,
+        "armure": 1000000000000000000000000,
+        "magique_resistance": 0, 
+        "coin": 50,
+        "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+    },
+    "fire": {
+        "name": "Fire",
+        "image": "monstre_Fire.png",
+        "size": (dp(30), dp(30)),
+        "speed": 10,
+        "health": 100,
+        "armure": 0,
+        "magique_resistance": 0, 
+        "coin": 50,
+        "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+    },
+    "ice": {
+        "name": "Ice",
+        "image": "monstre_Ice.png",
+        "size": (dp(30), dp(30)),
+        "speed": 10,
+        "health": 200,
+        "armure": 0,
+        "magique_resistance": 0, 
+        "coin": 50,
+        "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
     },
     # Ajoutez d'autres types de monstres ici...
 }

@@ -1,4 +1,5 @@
 #http://www.geofish.fr/td-privacy/
+
 from kivy import platform
 if platform == "win":   
     from kivy.modules.screen import apply_device
@@ -16,7 +17,6 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy.metrics import dp, sp
-from kivy.core.window import Window
 from functools import partial
 import os
 
@@ -49,6 +49,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.image import Image
 
 from kivy.properties import BooleanProperty
+from kivy.core.window import Window
 
 class ActiveBoxLayout(BoxLayout):
     active = BooleanProperty(False)
@@ -127,6 +128,20 @@ class TalentScreen(Screen):
         back_layout.add_widget(back_button)
         self.add_widget(back_layout)
 
+    def on_enter(self, *args):
+        self.refresh_label_stars()
+
+    def refresh_label_stars(self):
+        # Lire la valeur totale des étoiles
+        self.star_count = self.get_stars_from_json()
+
+        # Soustraire la somme des valeurs des talents
+        for talent in self.talents:
+            self.star_count -= self.get_talent_value(talent)
+
+        # Mettre à jour le label du compteur d'étoiles
+        self.star_label.text = f"Étoiles : {self.star_count} ({self.get_stars_from_json()})"
+
     def get_stars_from_json(self):
         # Chargez le total des étoiles du fichier JSON
         store = JsonStore('db/stars.json')
@@ -155,6 +170,8 @@ class TalentScreen(Screen):
             
             # Mettez à jour le label du talent
             self.talent_labels[talent_name].text = f"{talent_name}:\n+{new_value}%"
+        
+        self.refresh_label_stars()
 
     def return_to_world_selection(self, instance):
         self.manager.current = 'worlds'
@@ -185,7 +202,6 @@ class DeckScreen(MDScreen):
         # Button to save the selection
         save_button = MDRaisedButton(text="Sauvegarder", on_release=self.save_deck, size_hint_y=None, height=dp(50))
         self.main_layout.add_widget(save_button)  # Add to main_layout
-
 
     def on_enter(self, *args):
 
@@ -266,7 +282,6 @@ class DeckScreen(MDScreen):
                 if isinstance(child, CheckBox):
                     child.active = False
             
-    
     def save_deck(self, instance):
         print("Saving deck...")
         from reglages_tours import tours
@@ -279,7 +294,6 @@ class DeckScreen(MDScreen):
         print("Deck saved successfully!")
         
         self.return_to_world_selection(instance)
-
 
     def return_to_world_selection(self, instance):
         self.manager.current = 'worlds'
@@ -552,7 +566,7 @@ class WorldScreen(MDScreen):
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        print('init menu')
+        #print('init menu')
         self.world = None  # Initialisez l'attribut world
 
 
@@ -695,8 +709,21 @@ class MenuApp(MDApp):
 
         self.game_over_popup_shown = False
         self.game_win_popup_shown = False
-        return sm
 
+
+        Window.bind(on_request_close=self.intercept_back_button)
+
+        return sm
+    
+    def intercept_back_button(self, *args, **kwargs):
+        if self.manager.current == 'game':
+            #coder l'appel de la fonction "game_over(self)" de la classe monstre.py
+            return True  # Empêche la fermeture de l'application
+        elif self.manager.current == 'worlds':
+            return False  # Si vous n'êtes pas sur l'écran "game", autorisez le comportement par défaut du bouton "retour arrière"
+        else:
+            self.manager.current = 'worlds'
+            return True  # Empêche la fermeture de l'application et retourne a world
 
 if __name__ == '__main__':
     MenuApp().run()

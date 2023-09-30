@@ -15,6 +15,7 @@ from kivy.uix.image import Image
 
 import uuid, os
 from kivy.metrics import dp, sp
+from kivy.app import App
 
 import math
 from kivy.storage.jsonstore import JsonStore
@@ -35,7 +36,6 @@ class Tour(Widget):
 
         self.id = str(uuid.uuid4())  # Ajoutez cet identifiant unique
 
-        self.register_event_type('on_touch_up')
         self.x_button = None
         self.up_button = None
         self.del_button = None
@@ -86,7 +86,6 @@ class Tour(Widget):
         self.niveau_amelioration = 0
 
         self.range_circle = None
-
 
     def get_current_talents(self):
         # Lisez les talents depuis le fichier JSON et retournez-les sous forme de dictionnaire
@@ -144,7 +143,7 @@ class Tour(Widget):
                 self.animate_attack()
                 # Créez un projectile
 
-                print(self.name)
+                #print(self.name)
 
                 if self.name == "Ice":
                     projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
@@ -167,7 +166,7 @@ class Tour(Widget):
         closest_monster = None
         closest_distance = float('inf')
 
-        print("range:",self.range)
+        #print("range:",self.range)
 
         if not self.parent: #try correct issue #1
             return()
@@ -202,22 +201,39 @@ class Tour(Widget):
         return closest_monster
 
     def on_touch_up(self, touch):
+        # Print the size, position of the tower, and the touch position.
+        print(f"Tour {self.id} size: {self.size}")
+        print(f"Tour {self.id} position: {self.pos}")
+        print(f"Touch position: {touch.pos}")
+        root_widget = App.get_running_app().root
+        game_screen = root_widget.get_screen('game')
+        map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
+
+
+        print("Tour touchée:", self.id)
+        print("Tours avec boutons ouverts avant:",  map_zone.towers_with_buttons_open)
         if not self.active:
             return super().on_touch_up(touch)
 
         if self.collide_point(*touch.pos) and self.dragged:
-            # Affichez les boutons X et UP
-            self.show_buttons()
+            # Fermez les boutons de toutes les autres tours ouvertes
+            for tower in list(self.parent.towers_with_buttons_open.values()):
+                if tower != self:  # Ne fermez pas les boutons de la tour actuellement touchée
+                    tower.hidden_buttons_tour(None)
+            
+            # Réinitialisez le dictionnaire et ajoutez la tour actuelle
+            self.parent.towers_with_buttons_open = {self.id: self}
 
-            return True
+            # Affichez les boutons X et UP pour la tour actuellement touchée
+            self.show_buttons()
+            return False
+
         return super().on_touch_up(touch)
 
     def on_touch_down(self, touch):
         # Appeler le super pour s'assurer que tous les événements tactiles sont capturés
         super().on_touch_down(touch)
-
         print("on touch down called :")
-
         # Vérifiez si l'un des boutons est affiché
         if self.x_button or self.up_button or self.del_button:
             # Vérifiez si le toucher est sur l'un des boutons
@@ -232,42 +248,53 @@ class Tour(Widget):
                 print("c'est pas un bouton")
                 self.hidden_buttons_tour(None)
 
-
-
     def show_buttons(self):
+
         # Tout d'abord, retirez la tour de son parent
         parent = self.parent
         parent.remove_widget(self)
-        
+
         # Ajoutez-la à nouveau pour garantir qu'elle soit au-dessus
         parent.add_widget(self)
-        print(self.parent.parent.parent.width)
 
+        print("Affichage des boutons pour la tour:", self.id)
+        self.tower_buttons_opened = True
+        self.parent.towers_with_buttons_open[self.id] = self
+          
+        if self.x < (self.parent.parent.parent.width * .7):
             
-
-        # Logique pour afficher les boutons X et UP à côté de la tour
-        if not self.x_button:
-
-            self.x_button = MDIconButton(icon_size="10sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x, self.y), opacity=1)
-            self.x_button.bind(on_release=self.remove_tour)
-            self.add_widget(self.x_button, index=0)
-        
-        if not self.up_button:
-            self.up_button = MDIconButton(icon_size="10sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),
-                                            pos=(self.x, self.y + self.x_button.height/1.3), opacity=1)
-            self.up_button.bind(on_release=self.upgrade_tour)
-            self.add_widget(self.up_button, index=0)
-
-        if not self.del_button:
-            self.del_button = MDIconButton(icon_size="10sp",icon="eye-off",md_bg_color= (0,1,.6,1),
-                                            pos=(self.x, self.y + (self.x_button.height/1.3)*2), opacity=1)
-            self.del_button.bind(on_release=self.hidden_buttons_tour)
-            self.add_widget(self.del_button, index=0)
-
-
-
+            # Logique pour afficher les boutons X et UP à côté de la tour
+            if not self.x_button:
+                self.x_button = MDIconButton(icon_size="15sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x + self.width, self.y))
+                self.x_button.bind(on_release=self.remove_tour)
+                self.add_widget(self.x_button)
+            
+            if not self.up_button:
+                self.up_button = MDIconButton(icon_size="15sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),pos=(self.x + self.width, self.y + self.x_button.height))
+                self.up_button.bind(on_release=self.upgrade_tour)
+                self.add_widget(self.up_button)
+            if not self.del_button:
+                self.del_button = MDIconButton(icon_size="15sp",icon="eye-off",md_bg_color= (0,1,.6,1),pos=(self.x + self.width, self.y + self.x_button.height*2))
+                self.del_button.bind(on_release=self.hidden_buttons_tour)
+                self.add_widget(self.del_button)
+        else:
+            # Logique pour afficher les boutons X et UP à côté de la tour
+            if not self.x_button:
+                self.x_button = MDIconButton(icon_size="15sp",icon="delete-forever",md_bg_color= (1,1,.6,1), pos=(self.x - self.width, self.y))
+                self.x_button.bind(on_release=self.remove_tour)
+                self.add_widget(self.x_button)
+            
+            if not self.up_button:
+                self.up_button = MDIconButton(icon_size="15sp",icon="arrow-up-bold-hexagon-outline",md_bg_color= (1,1,.6,1),pos=(self.x - self.width, self.y + self.x_button.height))
+                self.up_button.bind(on_release=self.upgrade_tour)
+                self.add_widget(self.up_button)
+            if not self.del_button:
+                self.del_button = MDIconButton(icon_size="15sp",icon="eye-off",md_bg_color= (0,1,.6,1),pos=(self.x - self.width, self.y + self.x_button.height*2))
+                self.del_button.bind(on_release=self.hidden_buttons_tour)
+                self.add_widget(self.del_button)
 
     def remove_tour(self, instance):
+        print("try remove tower")
         # Stockez une référence à l'objet parent
         parent_ref = self.parent
 
@@ -290,6 +317,7 @@ class Tour(Widget):
             parent_ref.pieces_label.text = str(f'Pièces: {parent_ref.coins}')
 
     def upgrade_tour(self, instance):
+        print("upgrdde tour appelé")
         """Améliore les attributs de la tour en fonction des valeurs dans ameliorations_tours.py."""
         # Vérifiez si d'autres améliorations sont disponibles
         try :
@@ -337,12 +365,29 @@ class Tour(Widget):
             print(f"La tour de type {self.name} est déjà au niveau maximal d'amélioration.")
 
     def hidden_buttons_tour(self, instance):
-        self.x_button.parent.remove_widget(self.x_button)
-        self.x_button = None
-        self.up_button.parent.remove_widget(self.up_button)
-        self.up_button = None
-        self.del_button.parent.remove_widget(self.del_button)
-        self.del_button = None
+        print("Hidden_buttons_tour appelée!")
+        print("Masquage des boutons pour la tour:", self.id)
+
+        # Ajout de la gestion des tours avec boutons
+        self.tower_buttons_opened = False
+
+        if self.parent and self.id in self.parent.towers_with_buttons_open:
+            del self.parent.towers_with_buttons_open[self.id]
+
+        if self.x_button:
+            if self.x_button.parent:
+                self.x_button.parent.remove_widget(self.x_button)
+            self.x_button = None
+
+        if self.up_button:
+            if self.up_button.parent:
+                self.up_button.parent.remove_widget(self.up_button)
+            self.up_button = None
+
+        if self.del_button:
+            if self.del_button.parent:
+                self.del_button.parent.remove_widget(self.del_button)
+            self.del_button = None
 
     def animate_attack(self):
         """Change l'image de la tour pour montrer l'animation d'attaque."""

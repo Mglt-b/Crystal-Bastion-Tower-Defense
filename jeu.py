@@ -100,11 +100,15 @@ class MapZone(Widget):
 
         self.programmed_monster = 0 #compteur monstre programmés pour la victoire
 
+        #gestion des boutons des tours
+        self.tower_buttons_opened = False
+        self.towers_with_buttons_open = {}
+
         #print("Début de l'initialisation de MapZone")  # Ajouté pour le débogage
         self.lives = super().__init__(**kwargs)
         self.niveau = niveau
         self.actual_level = niveau["level"]
-        print("self.actual_level",self.actual_level)
+        #print("self.actual_level",self.actual_level)
         self.path_points = []
         self.dragging_tour = None  # Pour suivre la tour que nous déplaçons
         self.tower_drag_start_pos = None  # Pour sauvegarder la position d'origine de la tour
@@ -258,7 +262,7 @@ class MapZone(Widget):
                 #print("Appel à add_monster programmé.")
                 self.scheduled_monster_events.append(event)
                 self.programmed_monster += 1
-                print("self.programmed_monster :", self.programmed_monster)
+                #print("self.programmed_monster :", self.programmed_monster)
 
                 delay += random.uniform(0.1, 1.5)
 
@@ -270,18 +274,18 @@ class MapZone(Widget):
     def _add_monster(self, monster_info, path):
         monster_type = monstre_configurations[monster_info["type"]]
         monster = Monstre(type_monstre=monster_type, path=path, map_size=self.size)
-        print("monster added :", monster)
+        #print("monster added :", monster)
         app = App.get_running_app()
         app.active_monsters.append(self)
         monster.bind(on_monster_death=self.add_coins)
         self.add_widget(monster)
         self.current_monsters += 1
         self.label_current_monsters.text=f'Mobs: {self.current_monsters}'
-        print("'self.current_monsters' : ", self.current_monsters)
+        #print("'self.current_monsters' : ", self.current_monsters)
 
     def on_touch_down(self, touch):
-
-        
+        super().on_touch_up(touch)
+        print('classe MAPZONE on_touch_down')
         # Vérifiez si le toucher est sur un BoxLayout de Tour dans TourSelectionZone
         for tour_layout in self.parent.tour_selection_zone.children:
             if tour_layout.collide_point(*touch.pos):
@@ -294,10 +298,10 @@ class MapZone(Widget):
                     if tour_cost is not None:
                         self.cout = tour_cost
                     else:
-                        print("Error: Unable to retrieve tour cost")
+                        #print("Error: Unable to retrieve tour cost")
                         return False
                 else:
-                    print("Error: Tour object not found inside the BoxLayout")
+                    #print("Error: Tour object not found inside the BoxLayout")
                     return False
                 if self.coins >= self.cout:
                     # Créez une nouvelle instance de la tour pour le drag-and-drop
@@ -317,6 +321,8 @@ class MapZone(Widget):
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
+
+        print('classe MAPZONE on_touch_moove')
         try:
             # Vérifiez d'abord si l'attribut 'dragging_tour' existe
             if hasattr(self, 'dragging_tour') and self.dragging_tour:
@@ -379,6 +385,7 @@ class MapZone(Widget):
 
     def on_touch_up(self, touch):
 
+        print('classe MAPZONE on_touch_up')
         if self.dragging_tour:
             if self.dragging_tour.tower_image.source.endswith("tower_Impossible.png"):
                 # Supprimez simplement la tour "fantôme" et n'ajoutez pas de nouvelle tour.
