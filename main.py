@@ -716,13 +716,13 @@ class MenuApp(MDApp):
         return sm
     
     def intercept_back_button(self, *args, **kwargs):
-        if self.manager.current == 'game':
+        if self.root.current == 'game':
             #coder l'appel de la fonction "game_over(self)" de la classe monstre.py
             return True  # Empêche la fermeture de l'application
-        elif self.manager.current == 'worlds':
+        elif self.root.current == 'worlds':
             return False  # Si vous n'êtes pas sur l'écran "game", autorisez le comportement par défaut du bouton "retour arrière"
         else:
-            self.manager.current = 'worlds'
+            self.root.current = 'worlds'
             return True  # Empêche la fermeture de l'application et retourne a world
 
 if __name__ == '__main__':
