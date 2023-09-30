@@ -19,7 +19,7 @@ from kivy.app import App
 
 import math
 from kivy.storage.jsonstore import JsonStore
-from kivy.uix.floatlayout import FloatLayout
+
 
 def calculate_angle(source, target):
     dx = target[0] - source[0]
@@ -60,8 +60,9 @@ class Tour(Widget):
 
         self.size = config["taille"]
 
-        self.proj_col = config["projectile_color"]
         self.name = config["nom"]
+
+        self.element = config["element"]
 
 
         self.img_directory = "tower_images/"
@@ -146,16 +147,21 @@ class Tour(Widget):
                 #print(self.name)
 
                 if self.name == "Ice":
-                    projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    print("Ice projectile called")
+                    projectile = IceProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed)
                 elif self.name == "Fire":
-                    projectile = FireProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    print("Fire projectile called")
+                    projectile = FireProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed)
                 elif self.name == "Elec":
-                    projectile = ElecProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    print("Elec projectile called")
+                    projectile = ElecProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed)
                 elif self.name == "Bomb":
-                    projectile = BombProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    print("Bomb projectile called")
+                    projectile = BombProjectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed)
                     closest_monster.has_bomb = True
                 else:
-                    projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed, proj_col=self.proj_col)
+                    print("Normal projectile called")
+                    projectile = Projectile(source=self, degats_physiques=self.degats_physiques, degats_magiques=self.degats_magiques, target=closest_monster, speed=self.projectile_speed)
 
                 self.parent.add_widget(projectile)
 
@@ -202,16 +208,16 @@ class Tour(Widget):
 
     def on_touch_up(self, touch):
         # Print the size, position of the tower, and the touch position.
-        print(f"Tour {self.id} size: {self.size}")
-        print(f"Tour {self.id} position: {self.pos}")
-        print(f"Touch position: {touch.pos}")
+        #print(f"Tour {self.id} size: {self.size}")
+        #print(f"Tour {self.id} position: {self.pos}")
+        #print(f"Touch position: {touch.pos}")
         root_widget = App.get_running_app().root
         game_screen = root_widget.get_screen('game')
         map_zone = game_screen.map_zone  # Si `map_zone` est un attribut direct de GameScreen
 
 
-        print("Tour touchée:", self.id)
-        print("Tours avec boutons ouverts avant:",  map_zone.towers_with_buttons_open)
+        #print("Tour touchée:", self.id)
+        #print("Tours avec boutons ouverts avant:",  map_zone.towers_with_buttons_open)
         if not self.active:
             return super().on_touch_up(touch)
 
@@ -233,7 +239,7 @@ class Tour(Widget):
     def on_touch_down(self, touch):
         # Appeler le super pour s'assurer que tous les événements tactiles sont capturés
         super().on_touch_down(touch)
-        print("on touch down called :")
+        #print("on touch down called :")
         # Vérifiez si l'un des boutons est affiché
         if self.x_button or self.up_button or self.del_button:
             # Vérifiez si le toucher est sur l'un des boutons
@@ -241,11 +247,11 @@ class Tour(Widget):
             (self.up_button and self.up_button.collide_point(*touch.pos)) or \
             (self.del_button and self.del_button.collide_point(*touch.pos)):
                 # Si le toucher est sur l'un des boutons, retournez simplement
-                print("c'est un bouton")
+                #print("c'est un bouton")
                 return
             else:
                 # Si le toucher est en dehors des boutons, cachez-les
-                print("c'est pas un bouton")
+                #print("c'est pas un bouton")
                 self.hidden_buttons_tour(None)
 
     def show_buttons(self):
@@ -257,7 +263,7 @@ class Tour(Widget):
         # Ajoutez-la à nouveau pour garantir qu'elle soit au-dessus
         parent.add_widget(self)
 
-        print("Affichage des boutons pour la tour:", self.id)
+        #print("Affichage des boutons pour la tour:", self.id)
         self.tower_buttons_opened = True
         self.parent.towers_with_buttons_open[self.id] = self
           
@@ -294,7 +300,7 @@ class Tour(Widget):
                 self.add_widget(self.del_button)
 
     def remove_tour(self, instance):
-        print("try remove tower")
+        #print("try remove tower")
         # Stockez une référence à l'objet parent
         parent_ref = self.parent
 
@@ -317,18 +323,18 @@ class Tour(Widget):
             parent_ref.pieces_label.text = str(f'Pièces: {parent_ref.coins}')
 
     def upgrade_tour(self, instance):
-        print("upgrdde tour appelé")
-        """Améliore les attributs de la tour en fonction des valeurs dans ameliorations_tours.py."""
+        #print("upgrdde tour appelé")
+        #"""Améliore les attributs de la tour en fonction des valeurs dans ameliorations_tours.py."""
         # Vérifiez si d'autres améliorations sont disponibles
         try :
             upgrade_data = ameliorations[self.name][self.niveau_amelioration]
         except Exception as e:
-            print("Upgrade de cette tour non defini:", e)
+            #print("Upgrade de cette tour non defini:", e)
             self.hidden_buttons_tour(instance)
             return
         
         if self.parent.coins < upgrade_data["cout_amelioration"]:
-            print('pas assez argent')
+            #print('pas assez argent')
             self.hidden_buttons_tour(instance)
             return
 
@@ -365,8 +371,8 @@ class Tour(Widget):
             print(f"La tour de type {self.name} est déjà au niveau maximal d'amélioration.")
 
     def hidden_buttons_tour(self, instance):
-        print("Hidden_buttons_tour appelée!")
-        print("Masquage des boutons pour la tour:", self.id)
+        #print("Hidden_buttons_tour appelée!")
+        #print("Masquage des boutons pour la tour:", self.id)
 
         # Ajout de la gestion des tours avec boutons
         self.tower_buttons_opened = False

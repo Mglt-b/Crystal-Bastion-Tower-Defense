@@ -38,4 +38,57 @@ Le codage des montres (Classe, deplacement...) est géré dans monstres.py :
     - Gagné : le joueur a des points de vie >0 et tous les monstres montres
     - Perdu : le joueur n'a plus de point de vie <= 0
 
-    
+
+
+Les différentes tours :
+
+#Chaque tour a son type élémentaire. Une tour attaquant un monstre de même élément n'inglige pas de dégats, sauf pour l'élément "normal".
+
+    -Basique : Inflique uniquement des degats physiques.
+               Dégats : moyen
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : 0
+
+    -Magique : Inflique uniquement des degats magiques.
+               Dégats : moyen
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : 0
+
+    -Rapide : Inflique uniquement des degats phisiques.
+               Dégats : moyen
+               Target : monocible
+               Portée : courte
+               Cadence : rapide
+               Effet : 0
+
+    - Ice : Inflige des degats magiques, et ralentit la cible.
+               Dégats : faible
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : snare
+
+    - Fire : Inflige des degats magiques, et enflamme la cible.
+               Dégats : faible
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : dot (degats magiques over time) 
+
+    - Elec : Inflige des degats magiques, et immobilise la cible.
+               Dégats : faible
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : root
+
+    - Bomb : Pose une bombe sur la cible..
+               Dégats : 0
+               Target : monocible
+               Portée : moyenne
+               Cadence : moyenne
+               Effet : explose après quelques secondes et inflige des degats a tous les enemis dans la zone.      

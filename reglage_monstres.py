@@ -14,6 +14,7 @@ monstre_configurations = {
         "magique_resistance": 10, 
         "coin": 10,
         "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "normal"  # nouvel attribut
     },
     "rapide": {
         "name": "Rapide",
@@ -25,6 +26,7 @@ monstre_configurations = {
         "magique_resistance": 0, 
         "coin": 10,
         "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "normal"  # nouvel attribut
     },
     "tank": {
         "name": "Tank",
@@ -36,6 +38,7 @@ monstre_configurations = {
         "magique_resistance": 0, 
         "coin": 50,
         "rotation_behavior": "fixed",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "normal"  # nouvel attribut
     },
     "ghost": {
         "name": "Ghost",
@@ -47,6 +50,7 @@ monstre_configurations = {
         "magique_resistance": 0, 
         "coin": 50,
         "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "dark"  # nouvel attribut
     },
     "fire": {
         "name": "Fire",
@@ -58,6 +62,7 @@ monstre_configurations = {
         "magique_resistance": 0, 
         "coin": 50,
         "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "fire"  # nouvel attribut
     },
     "ice": {
         "name": "Ice",
@@ -69,6 +74,31 @@ monstre_configurations = {
         "magique_resistance": 0, 
         "coin": 50,
         "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "ice"  # nouvel attribut
+    },
+    "stone": {
+        "name": "Stone",
+        "image": "monstre_Stone.png",
+        "size": (dp(30), dp(30)),
+        "speed": 4,
+        "health": 500,
+        "armure": 1000000000000000000,
+        "magique_resistance": 0, 
+        "coin": 50,
+        "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "normal"  # nouvel attribut
+    },
+    "meca": {
+        "name": "Meca",
+        "image": "monstre_Meca.png",
+        "size": (dp(30), dp(30)),
+        "speed": 10,
+        "health": 50,
+        "armure": 100,
+        "magique_resistance": 0, 
+        "coin": 50,
+        "rotation_behavior": "path_direction",  # Nouveau champ (peut être "fixed", "path_direction", etc.)
+        "element": "normal"  # nouvel attribut
     },
     # Ajoutez d'autres types de monstres ici...
 }

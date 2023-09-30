@@ -264,7 +264,7 @@ class MapZone(Widget):
                 self.programmed_monster += 1
                 #print("self.programmed_monster :", self.programmed_monster)
 
-                delay += random.uniform(0.1, 1.5)
+                delay += random.uniform(0.4, 2)
 
                 # Ajoutez cette ligne pour incrémenter le compteur total de monstres lorsqu'un nouveau monstre apparaît
                              

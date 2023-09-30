@@ -7,12 +7,10 @@ from kivy.metrics import dp, sp
 from kivy.storage.jsonstore import JsonStore
 
 class Projectile(Widget):
-    damage = NumericProperty(0)
     speed = NumericProperty(0)
     angle = NumericProperty(0)  # Nouvelle propriété pour stocker l'angle de rotation actuel
     source = ObjectProperty(None)
     target = ObjectProperty(None)
-    proj_col = ListProperty([1, 1, 1, 1])
     degats_physiques = NumericProperty(0)
     degats_magiques = NumericProperty(0)
     
@@ -20,10 +18,7 @@ class Projectile(Widget):
         super().__init__(**kwargs)
         self.source = kwargs.get('source', None)
         self.target = kwargs.get('target', None)
-        self.damage = kwargs.get('damage', 0)
         self.speed = kwargs.get('speed', 5)
-        self.proj_col = kwargs.get('proj_col', [1, 1, 1, 1])
-
         self.size = (dp(15), dp(15))
         self.pos = self.source.center
 
@@ -56,19 +51,17 @@ class Projectile(Widget):
 
         # Vérification si le projectile a atteint la cible
         if Vector(self.center).distance(self.target.center) < dp(7):
-            self.target.take_damage(self.degats_physiques, self.degats_magiques)
+            self.target.take_damage(self.degats_physiques, self.degats_magiques, self.source)
             if self.parent:
                 self.parent.remove_widget(self)
             Clock.unschedule(self.move)
 
 
 class IceProjectile(Projectile):  
-    damage = NumericProperty(0)
     speed = NumericProperty(0)
     angle = NumericProperty(0)  # Nouvelle propriété pour stocker l'angle de rotation actuel
     source = ObjectProperty(None)
     target = ObjectProperty(None)
-    proj_col = ListProperty([1, 1, 1, 1])
     degats_physiques = NumericProperty(0)
     degats_magiques = NumericProperty(0)
     
@@ -76,9 +69,7 @@ class IceProjectile(Projectile):
         super().__init__(**kwargs)
         self.source = kwargs.get('source', None)
         self.target = kwargs.get('target', None)
-        self.damage = kwargs.get('damage', 0)
         self.speed = kwargs.get('speed', 5)
-        self.proj_col = kwargs.get('proj_col', [1, 1, 1, 1])
 
         self.size = (dp(15), dp(15))
         self.pos = self.source.center
@@ -112,7 +103,7 @@ class IceProjectile(Projectile):
 
         # Vérification si le projectile a atteint la cible
         if Vector(self.center).distance(self.target.center) < dp(7):
-            self.target.take_damage(self.degats_physiques, self.degats_magiques)
+            self.target.take_damage(self.degats_physiques, self.degats_magiques, self.source)
             self.parent.remove_widget(self)
             Clock.unschedule(self.move)
 
@@ -120,12 +111,10 @@ class IceProjectile(Projectile):
 
 
 class FireProjectile(Projectile):  
-    damage = NumericProperty(0)
     speed = NumericProperty(0)
     angle = NumericProperty(0)  # Nouvelle propriété pour stocker l'angle de rotation actuel
     source = ObjectProperty(None)
     target = ObjectProperty(None)
-    proj_col = ListProperty([1, 1, 1, 1])
     degats_physiques = NumericProperty(0)
     degats_magiques = NumericProperty(0)
     
@@ -133,12 +122,11 @@ class FireProjectile(Projectile):
         super().__init__(**kwargs)
         self.source = kwargs.get('source', None)
         self.target = kwargs.get('target', None)
-        self.damage = kwargs.get('damage', 0)
         self.speed = kwargs.get('speed', 5)
-        self.proj_col = kwargs.get('proj_col', [1, 1, 1, 1])
-
         self.size = (dp(15), dp(15))
         self.pos = self.source.center
+
+        print("Fire projectile init")
 
         with self.canvas:
             PushMatrix()  # Sauvegarde de l'état graphique actuel
@@ -169,7 +157,7 @@ class FireProjectile(Projectile):
 
         # Vérification si le projectile a atteint la cible
         if Vector(self.center).distance(self.target.center) < dp(7):
-            self.target.take_damage(self.degats_physiques, self.degats_magiques)
+            self.target.take_damage(self.degats_physiques, self.degats_magiques, self.source)
             self.parent.remove_widget(self)
             Clock.unschedule(self.move)
 
@@ -177,12 +165,10 @@ class FireProjectile(Projectile):
 
 
 class ElecProjectile(Projectile):  
-    damage = NumericProperty(0)
     speed = NumericProperty(0)
     angle = NumericProperty(0)  # Nouvelle propriété pour stocker l'angle de rotation actuel
     source = ObjectProperty(None)
     target = ObjectProperty(None)
-    proj_col = ListProperty([1, 1, 1, 1])
     degats_physiques = NumericProperty(0)
     degats_magiques = NumericProperty(0)
     
@@ -190,9 +176,7 @@ class ElecProjectile(Projectile):
         super().__init__(**kwargs)
         self.source = kwargs.get('source', None)
         self.target = kwargs.get('target', None)
-        self.damage = kwargs.get('damage', 0)
         self.speed = kwargs.get('speed', 5)
-        self.proj_col = kwargs.get('proj_col', [1, 1, 1, 1])
 
         self.size = (dp(15), dp(15))
         self.pos = self.source.center
@@ -226,7 +210,7 @@ class ElecProjectile(Projectile):
 
         # Vérification si le projectile a atteint la cible
         if Vector(self.center).distance(self.target.center) < dp(7):
-            self.target.take_damage(self.degats_physiques, self.degats_magiques)
+            self.target.take_damage(self.degats_physiques, self.degats_magiques, self.source)
             self.parent.remove_widget(self)
             Clock.unschedule(self.move)
 
@@ -238,7 +222,6 @@ class BombProjectile(Widget):
     source = ObjectProperty(None)
     target = ObjectProperty(None)
     angle = NumericProperty(0)
-    proj_col = ListProperty([1, 1, 1, 1])
     degats_physiques = NumericProperty(0)
     degats_magiques = NumericProperty(0)
     degats_bombe = NumericProperty(25)
@@ -325,14 +308,14 @@ class BombProjectile(Widget):
         self.center = self.target.center
         self.image.pos = (self.center_x - self.explosion_range, self.center_y - self.explosion_range)
         self.image.size = self.size
-        self.image.source = 'effect_images/explosed_image.png'
+        self.image.source = 'effect_images/Explosed_image.png'
 
         # Infligez des dégâts à tous les monstres dans la portée de l'explosion
         from monstres import Monstre
         for child in self.parent.children:
             if isinstance(child, Monstre):
                 if Vector(self.center).distance(child.center) <= self.explosion_range:
-                    child.take_damage(self.degats_bombe, self.degats_bombe)  # En supposant que la classe Monstre ait une méthode take_damage
+                    child.take_damage(self.degats_bombe, self.degats_bombe, self.source)  # En supposant que la classe Monstre ait une méthode take_damage
 
         Clock.unschedule(self.follow_target)
         Clock.schedule_once(self.remove_bomb, 0.2)  # Supprimez la bombe après l'animation de l'explosion

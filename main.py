@@ -51,6 +51,10 @@ from kivy.uix.image import Image
 from kivy.properties import BooleanProperty
 from kivy.core.window import Window
 
+from kivy.core.window import Window
+from kivy.config import Config
+Config.set('kivy', 'exit_on_escape', '0')
+
 class ActiveBoxLayout(BoxLayout):
     active = BooleanProperty(False)
 
@@ -232,7 +236,7 @@ class DeckScreen(MDScreen):
 
             tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint={'center_x': .5, 'center_y': .5}, font_size=sp(8))
 
-            checkbox = CheckBox(size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+            checkbox = CheckBox(size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5}, color=[0, 0, 0, 1])
             checkbox.bind(active=tower_layout.setter('active'))
 
             tower_layout.bind(active=self.check_tower_selection)
@@ -366,7 +370,7 @@ class TowerShopScreen(Screen):
             tower_label = MDLabel(text=tower_name, valign='middle', halign='center', color="black", pos_hint= {'center_x': .5, 'center_y': .5},
                                 font_size=sp(8))
 
-            info_button = MDIconButton(icon="information-variant-circle-outline", icon_size= "18sp", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5})
+            info_button = MDIconButton(icon="information", icon_size= "18sp", on_release=partial(self.show_tower_info, tower), size_hint_y=None, height=dp(20), pos_hint= {'center_x': .5, 'center_y': .5}, text_color="blue", theme_text_color="Custom")
             
 
             if self.is_tower_bought(tower_name):
@@ -465,6 +469,10 @@ class TowerShopScreen(Screen):
     def update_buy_button(self, tower_name, instance, *args):
         if self.is_tower_bought(tower_name):
             instance.parent.remove_widget(instance)
+
+    def on_enter(self):
+        self.update_cristaux_label()  # met à jour l'affichage du compteur
+        print("update cristaux")
 
 class WorldScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -711,20 +719,23 @@ class MenuApp(MDApp):
         self.game_over_popup_shown = False
         self.game_win_popup_shown = False
 
-
-        Window.bind(on_request_close=self.intercept_back_button)
+        Window.bind(on_keyboard=self.intercept_back_button)
 
         return sm
-    
-    def intercept_back_button(self, *args, **kwargs):
-        if self.root.current == 'game':
-            #coder l'appel de la fonction "game_over(self)" de la classe monstre.py
-            return True  # Empêche la fermeture de l'application
-        elif self.root.current == 'worlds':
-            return False  # Si vous n'êtes pas sur l'écran "game", autorisez le comportement par défaut du bouton "retour arrière"
-        else:
-            self.root.current = 'worlds'
-            return True  # Empêche la fermeture de l'application et retourne a world
+
+    def intercept_back_button(self, window, key, *largs):
+        if key == 27:
+            current_screen = self.root.current
+            if current_screen == 'game':
+                # Appeler la fonction "game_over" de la classe Monstre ici
+                # ... [votre code pour game_over]
+                return True  # Empêche la fermeture de l'application
+            elif current_screen == 'worlds':
+                return False  # Si vous n'êtes pas sur l'écran "game", autorisez le comportement par défaut du bouton "retour arrière"
+            else:
+                self.root.current = 'worlds'
+                return True  # Empêche la fermeture de l'application et retourne à "worlds"
+        return False  # Si ce n'est pas le bouton de retour, n'interceptez pas l'événement
 
 if __name__ == '__main__':
     MenuApp().run()

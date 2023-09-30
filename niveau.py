@@ -66,6 +66,8 @@ def generate_random_path(grid_size, path_length, min_turns):
     return path
 #random generate : generate_random_path(8, 100000, 5)
 
+def reverse_path(path):
+    return path[::-1]
 
 types_decor = {
     "arbre": {"image": "decors_images/arbre_image_1.png", "size": (dp(20), dp(20))},
@@ -84,7 +86,7 @@ path_level_2 = [(0.0, 0.8), (0.125, 0.8), (0.3, 0.8),
                 (0.8, 1),
                 (0, 1)] #fin
 
-path_level_3 = [(0.50, 0.69), (0.03, 0.22), (0.48, 1.1), (0.81, 0.68), (0.38, 0.31), (1.00, 0.38)]
+path_level_3 = [(0.50, 0.69), (0.1, 0.22), (0.1, 1), (0.4, 1), (0.81, 0.68), (0.38, 0.31), (1.00, 0.38)]
 
 path_level_4 = [(0.01, 0.20), 
                 (0.48, 0.69), (0.03, 0.69), 
@@ -92,23 +94,18 @@ path_level_4 = [(0.01, 0.20),
                 (0.97, 0.69), (0.52, 0.69), 
                 (1.00, 0.20)]
 
-path_level_5 =[(0.27875, 0.49833333333333335), (0.27875, 0.3016666666666667), (0.125, 0.3016666666666667), (0.125, 0.028333333333333332), 
-               (0.84, 0.028333333333333332), (0.84, 0.24333333333333335), (0.615, 0.24333333333333335), (0.615, 0.615), (0.94625, 0.615), 
-               (0.94625, 0.9316666666666666), (0.47375, 0.9316666666666666), (0.47375, 0.6133333333333333), (0.36, 0.6133333333333333), (0.36, 0.7233333333333334)]
+path_level_5 =[(0.27875, 0.69833333333333335), (0.27875, 0.8016666666666667), (0.125, 0.8016666666666667), (0.125, 0.228333333333333332), 
+               (0.84, 0.228333333333333332), (0.84, 0.44333333333333335), (0.615, 0.44333333333333335), (0.615, 0.815), (0.94625, 0.815), 
+               (0.94625, 1), (0.47375, 1), (0.47375, 0.8133333333333333), (0.36, 0.8133333333333333), (0.36, 0.9233333333333334)]
 
 
-path_level_6 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
-            (0.25,0.35),(0.25,0.225),
-            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
+path_level_6 =[(0, 1), (0.875, 0.3), (1.0, 0.3), (1.0, 0.425), (0.875, 0.425), (0.75, 0.425),
+                (0.75, 0.3), (0.625, 0.3), (0.5, 0.3), (0.375, 0.3), (0.25, 0.3), (0.25, 0.525),
+                  (0.25, 0.55), (0.125, 0.55), (0.125, 0.425), (0.125, 0.3), (0.0, 0.3), (0.0, 0.425), (0.0, 0.55), (0.0, 0.675), (0.0, 0.6)]
  
-path_level_7 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
-            (0.25,0.35),(0.25,0.225),
-            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
+path_level_7 =reverse_path(path_level_3)
 
-path_level_8 =[(0.0,0.6),(0.0,0.475),(0.0,0.35),(0.0,0.225),(0.0,0.1),(0.125,0.1),(0.125,0.225),(0.125,0.35),
-            (0.25,0.35),(0.25,0.225),
-            (0.25,0.1),(0.375,0.1),(0.5,0.1),(0.625,0.1),(0.75,0.1),(0.75,0.225),(0.875,0.225),(1.0,0.225),(1.0,0.1),(0.875,0.1),(0,0.9)]
-
+path_level_8 =reverse_path(path_level_2)
 
 
 path_level_10 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25, 0.6), (0.375, 0.6), 
@@ -177,7 +174,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "Monde 1",
         "level": 5,
         "path": path_level_5,
         "monsters": [
@@ -189,7 +186,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "Monde 1",
         "level": 6,
         "path": path_level_6,
         "monsters": [
@@ -201,12 +198,11 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "Monde 1",
         "level": 7,
         "path": path_level_7,
         "monsters": [
-            {"type": "normal", "count": 10},
-            {"type": "rapide", "count": 12}
+            {"type": "stone", "count": 10},
                     ],
         "decor": [],
         "sol": [{"type": "decors_images/sols/futuriste_7.png",
@@ -214,21 +210,22 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "Monde 1",
         "level": 8,
         "path": path_level_8,
         "monsters": [
-            {"type": "normal", "count": 10},
-            {"type": "rapide", "count": 12}
+            {"type": "normal", "count": 1},
+            {"type": "rapide", "count": 1},
+            {"type": "meca", "count": 10},       
                     ],
         "decor": [],
         "sol": [{"type": "decors_images/sols/futuriste_8.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
-    # MONDE 3
+    # MONDE 2
     {
-        "world": "Monde 3",
+        "world": "Monde 2",
         "level": 9,
         "path": path_level_8,
         "monsters": [
@@ -241,7 +238,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "Monde 2",
         "level": 10,
         "path": path_level_8,
         "monsters": [
@@ -249,12 +246,12 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [{"type": "decors_images/sols/foret_1.png",
+        "sol": [{"type": "decors_images/sols/foret_2.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "Monde 2",
         "level": 11,
         "path": path_level_8,
         "monsters": [
@@ -262,7 +259,125 @@ niveaux = [
             {"type": "rapide", "count": 12}
                     ],
         "decor": [],
-        "sol": [{"type": "decors_images/sols/foret_1.png",
+        "sol": [{"type": "decors_images/sols/foret_3.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    # MONDE 3
+    {
+        "world": "Monde 3",
+        "level": 12,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_1.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 13,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_2.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 14,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_3.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 15,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_4.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 16,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_5.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 17,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_6.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 18,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_7.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 3",
+        "level": 19,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_8.png",
+                "size": 1}],
+        "chemin": [{"type": "decors_images/futur_sol.png"}],
+    },
+    {
+        "world": "Monde 4",
+        "level": 20,
+        "path": path_level_8,
+        "monsters": [
+            {"type": "normal", "count": 10},
+            {"type": "rapide", "count": 12}
+                    ],
+        "decor": [],
+        "sol": [{"type": "decors_images/sols/lave_2.png",
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },

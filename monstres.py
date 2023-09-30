@@ -59,6 +59,7 @@ class Monstre(Widget):
         self.armure = type_monstre["armure"]
         self.magique_resistance = type_monstre["magique_resistance"]
         self.vie_max = self.health
+        self.element = type_monstre["element"]
         
         self.rotation_behavior = type_monstre["rotation_behavior"] #rotation type
 
@@ -154,14 +155,15 @@ class Monstre(Widget):
         self.freeze_effect.center = self.center
 
     def apply_slow_effect(self):
-        if not self.slowed:
-            self.slowed = True
-            self.freeze_effect.opacity = 1  # Show the freeze effect with some transparency
-            original_speed = self.speed
-            self.speed /= 4  # Halving the speed
-            # Reset the speed after 2 seconds (or other desired duration)
-            self.monster_image.opacity = .7
-            Clock.schedule_once(lambda dt: self.remove_slow_effect(original_speed), 5)
+        if self.element != "ice":
+            if not self.slowed:
+                self.slowed = True
+                self.freeze_effect.opacity = 1  # Show the freeze effect with some transparency
+                original_speed = self.speed
+                self.speed /= 4  # Halving the speed
+                # Reset the speed after 2 seconds (or other desired duration)
+                self.monster_image.opacity = .7
+                Clock.schedule_once(lambda dt: self.remove_slow_effect(original_speed), 5)
             
     def remove_slow_effect(self, original_speed):
         self.slowed = False
@@ -174,14 +176,15 @@ class Monstre(Widget):
         self.freeze_effect.center = self.center
 
     def apply_elec_effect(self):
-        if not self.elected:
-            self.elected = True
-            self.elec_effect.opacity = 1  # Show the freeze effect with some transparency
-            original_speed = self.speed
-            self.speed = 0  # Halving the speed
-            # Reset the speed after 2 seconds (or other desired duration)
-            self.monster_image.opacity = .7
-            Clock.schedule_once(lambda dt: self.remove_elec_effect(original_speed), 5)
+        if self.element != "electriq":
+            if not self.elected:
+                self.elected = True
+                self.elec_effect.opacity = 1  # Show the freeze effect with some transparency
+                original_speed = self.speed
+                self.speed = 0  # Halving the speed
+                # Reset the speed after 2 seconds (or other desired duration)
+                self.monster_image.opacity = .7
+                Clock.schedule_once(lambda dt: self.remove_elec_effect(original_speed), 5)
             
     def remove_elec_effect(self, original_speed):
         self.elected = False
@@ -194,26 +197,28 @@ class Monstre(Widget):
         self.burn_effect.center = self.center
 
     def apply_burn_effect(self):
-        if not self.burned:
-            self.burned = True
-            self.burn_effect.opacity = 1  # Show the burn effect
-            
-            # Schedule the damage every 2 seconds
-            self.burn_event = Clock.schedule_interval(self.burn_damage, 2)
-            
-            # Stop the burn damage after 10 seconds
-            Clock.schedule_once(self.remove_burn_effect, 15)
+        if self.element != "fire":
+            if not self.burned:
+                self.burned = True
+                self.burn_effect.opacity = 1  # Show the burn effect
+                
+                # Schedule the damage every 2 seconds
+                self.burn_event = Clock.schedule_interval(self.burn_damage, 2)
+                
+                # Stop the burn damage after 10 seconds
+                Clock.schedule_once(self.remove_burn_effect, 15)
 
     def burn_damage(self, dt):
         # Inflict 5 points of damage
-        self.take_damage(5, 0)  # Assuming burn is physical damage. Adjust if otherwise.
+
+        self.take_damage(5, 0, None)  # Assuming burn is physical damage. Adjust if otherwise.
 
     def remove_burn_effect(self, dt=None):
         self.burned = False
         self.burn_effect.opacity = 0  # Hide the burn effect
         Clock.unschedule(self.burn_event)  # Stop the recurring damage
 
-    def take_damage(self, damage_physique, damage_magique):
+    def take_damage(self, damage_physique, damage_magique, tour_source):
         # Calcul des dégâts réels en prenant en compte l'armure et la résistance magique
         degats_reels_physiques = damage_physique * (1 - (self.armure / (100 + self.armure)))
         degats_reels_magiques = damage_magique * (1 - (self.magique_resistance / (100 + self.magique_resistance)))
@@ -221,9 +226,13 @@ class Monstre(Widget):
         # Somme des dégâts réels
         total_damage = degats_reels_physiques + degats_reels_magiques
 
-        #print("take damage :", degats_reels_physiques, degats_reels_magiques, total_damage)
-        
-        self.health -= total_damage
+
+        #inflige degats
+        if tour_source:
+            if self.element != tour_source.element or (self.element == 'normal' and tour_source.element =='normal'):
+                self.health -= total_damage
+        else:
+            self.health -= total_damage  
 
         # Mettre à jour la taille de la barre de vie
         pct_vie = self.health / self.vie_max
