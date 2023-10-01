@@ -79,7 +79,7 @@ class Monstre(Widget):
         self.name = type_monstre["name"]
         
         # Monster graphics
-        with self.canvas:
+        with self.canvas.after:
             # Début de la rotation
             PushMatrix()
             self.rotation = Rotate(angle=self.angle, origin=self.center)
