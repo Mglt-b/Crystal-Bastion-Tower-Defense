@@ -621,7 +621,7 @@ class MainMenu(Screen):
 
         for niveau in [n for n in niveaux if n["world"] == self.world]:
             level_id = niveau["level"]
-            button_text = "Niveau " + str(level_id)
+            button_text = "Level " + str(level_id)
             
             # Create a horizontal layout for each level
             level_layout = BoxLayout(orientation='horizontal', spacing=dp(5), height=dp(20))

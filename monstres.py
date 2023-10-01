@@ -211,7 +211,7 @@ class Monstre(Widget):
     def burn_damage(self, dt):
         # Inflict 5 points of damage
 
-        self.take_damage(5, 0, None)  # Assuming burn is physical damage. Adjust if otherwise.
+        self.take_damage(0, 5, None)
 
     def remove_burn_effect(self, dt=None):
         self.burned = False
@@ -276,7 +276,7 @@ class Monstre(Widget):
 
                     #print("perd vie")
                     map_zone.lives -= 1
-                    map_zone.lives_label.text = f'Vies: {map_zone.lives}'
+                    map_zone.lives_label.text = f'Lifes: {map_zone.lives}'
                     
                     map_zone.current_monsters -= 1
                     map_zone.label_current_monsters.text=f'Mobs: {map_zone.current_monsters}'
@@ -559,7 +559,7 @@ class Monstre(Widget):
         # À la fin de l'animation, supprimez la pièce de map_zone et mettez à jour le nombre de pièces
         def on_animation_complete(animation, coin_instance):
             map_zone.coins += coin.value
-            map_zone.pieces_label.text = f"Pièces: {map_zone.coins}"
+            map_zone.pieces_label.text = f"Coins: {map_zone.coins}"
             map_zone.remove_widget(coin_instance)
             #print("Animation complete!")
 
@@ -573,7 +573,7 @@ class Monstre(Widget):
     def finalize_coin_animation(self, coin, map_zone):
         # Mettre à jour le nombre de pièces
         map_zone.coins += coin.value
-        map_zone.pieces_label.text = f'Pièces: {map_zone.coins}'
+        map_zone.pieces_label.text = f'Coins: {map_zone.coins}'
         
         # Supprimer la pièce animée de l'écran
         map_zone.remove_widget(coin)

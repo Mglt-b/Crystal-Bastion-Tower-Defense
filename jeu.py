@@ -123,13 +123,13 @@ class MapZone(Widget):
 
         #section pieces du joueur
         self.coins = 150
-        self.pieces_label = Label(text=f'Pièces: {self.coins}', pos=(dp(30), Window.height - dp(40)), color="red", font_size = dp(12))
+        self.pieces_label = Label(text=f'Coins: {self.coins}', pos=(dp(30), Window.height - dp(40)), color="red", font_size = dp(12))
         self.pieces_label.id = 'pieces_label'  # Ajout d'un ID
         self.add_widget(self.pieces_label)
 
         #compteur de vie du joueur
         self.lives = 20  # Initialize with 20 lisves
-        self.lives_label = Label(text=f'Vies: {self.lives}', pos=(dp(150), Window.height - dp(40)), color="blue", font_size = dp(12))
+        self.lives_label = Label(text=f'Lifes: {self.lives}', pos=(dp(150), Window.height - dp(40)), color="blue", font_size = dp(12))
         self.add_widget(self.lives_label)
 
         self.scheduled_monster_events = []  # Ajoutez ceci pour stocker les événements programmés
@@ -417,7 +417,7 @@ class MapZone(Widget):
                                 self.dragging_tour = None
 
                                 self.coins -= self.cout
-                                self.pieces_label.text = str(f'Pièces: {self.coins}')
+                                self.pieces_label.text = str(f'Coins: {self.coins}')
 
 
 
@@ -487,7 +487,7 @@ class MapZone(Widget):
     
     def add_coins(self, instance, value):
         self.coins += value
-        self.pieces_label.text = str(f'Pièces: {self.coins}')
+        self.pieces_label.text = str(f'Coins: {self.coins}')
 
 class MainLayout(BoxLayout):
     def __init__(self, niveau, **kwargs):

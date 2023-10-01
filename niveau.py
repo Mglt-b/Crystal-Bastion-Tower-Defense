@@ -116,7 +116,7 @@ path_level_10 = [(0.0, 0.6), (0.125, 0.6), (0.125, 0.725), (0.25, 0.725), (0.25,
 
 niveaux = [
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 1,
         "path": path_level_1,
         "monsters": [
@@ -133,7 +133,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 2,
         "path": path_level_2,
         "monsters": [
@@ -146,7 +146,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 3,
         "path": path_level_3,
         "monsters": [
@@ -162,7 +162,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 4,
         "path": path_level_4,
         "monsters": [
@@ -174,7 +174,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 5,
         "path": path_level_5,
         "monsters": [
@@ -186,7 +186,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 6,
         "path": path_level_6,
         "monsters": [
@@ -198,7 +198,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 7,
         "path": path_level_7,
         "monsters": [
@@ -210,7 +210,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 1",
+        "world": "World 1",
         "level": 8,
         "path": path_level_8,
         "monsters": [
@@ -223,9 +223,9 @@ niveaux = [
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
-    # MONDE 2
+    # World 2
     {
-        "world": "Monde 2",
+        "world": "World 2",
         "level": 9,
         "path": path_level_8,
         "monsters": [
@@ -238,7 +238,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "World 2",
         "level": 10,
         "path": path_level_8,
         "monsters": [
@@ -251,7 +251,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 2",
+        "world": "World 2",
         "level": 11,
         "path": path_level_8,
         "monsters": [
@@ -263,9 +263,9 @@ niveaux = [
                 "size": 1}],
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
-    # MONDE 3
+    # World 3
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 12,
         "path": path_level_8,
         "monsters": [
@@ -278,7 +278,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 13,
         "path": path_level_8,
         "monsters": [
@@ -291,7 +291,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 14,
         "path": path_level_8,
         "monsters": [
@@ -304,7 +304,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 15,
         "path": path_level_8,
         "monsters": [
@@ -317,7 +317,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 16,
         "path": path_level_8,
         "monsters": [
@@ -330,7 +330,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 17,
         "path": path_level_8,
         "monsters": [
@@ -343,7 +343,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 18,
         "path": path_level_8,
         "monsters": [
@@ -356,7 +356,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 3",
+        "world": "World 3",
         "level": 19,
         "path": path_level_8,
         "monsters": [
@@ -369,7 +369,7 @@ niveaux = [
         "chemin": [{"type": "decors_images/futur_sol.png"}],
     },
     {
-        "world": "Monde 4",
+        "world": "World 4",
         "level": 20,
         "path": path_level_8,
         "monsters": [

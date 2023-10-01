@@ -181,27 +181,47 @@ class Tour(Widget):
             return()
         
         for child in self.parent.children:
- 
-            if isinstance(child, Monstre) and not child.has_bomb and not child.slowed and not child.burned and not child.elected:
-                
-                #print("################################")
-                #print('demande de calcul de distance :')
-                #print("self.center",self.center)
-                #print("child.center",child.center)
-                distance = self.distance(self.center, child.center)
 
-                #print('monstre :', child)
-                #print('distance :',distance)
-                #print('closest_distance :',closest_distance)
-                #print('self.range :',self.range)
+            if self.name == "Ice":
+                if isinstance(child, Monstre) and not child.slowed:
+                    distance = self.distance(self.center, child.center)
+                    if distance < closest_distance and dp(distance) <= dp(self.range):
+                        #print("debug",child.pos, child.x, child.y)
+                        closest_distance = distance
+                        closest_monster = child
 
-                #print('dp(80) = ', dp(80))
+            elif self.name == "Fire":
+                if isinstance(child, Monstre) and not child.burned:
+                    distance = self.distance(self.center, child.center)
+                    if distance < closest_distance and dp(distance) <= dp(self.range):
+                        #print("debug",child.pos, child.x, child.y)
+                        closest_distance = distance
+                        closest_monster = child
+
+            elif self.name == "Elec":
+                if isinstance(child, Monstre) and not child.elected:
+                    distance = self.distance(self.center, child.center)
+                    if distance < closest_distance and dp(distance) <= dp(self.range):
+                        #print("debug",child.pos, child.x, child.y)
+                        closest_distance = distance
+                        closest_monster = child
+
+            elif self.name == "Bomb":
+                if isinstance(child, Monstre) and not child.has_bomb:
+                    distance = self.distance(self.center, child.center)
+                    if distance < closest_distance and dp(distance) <= dp(self.range):
+                        #print("debug",child.pos, child.x, child.y)
+                        closest_distance = distance
+                        closest_monster = child
 
 
-                if distance < closest_distance and dp(distance) <= dp(self.range):
-                    #print("debug",child.pos, child.x, child.y)
-                    closest_distance = distance
-                    closest_monster = child
+            else:
+                if isinstance(child, Monstre) and not child.has_bomb:
+                    distance = self.distance(self.center, child.center)
+                    if distance < closest_distance and dp(distance) <= dp(self.range):
+                        #print("debug",child.pos, child.x, child.y)
+                        closest_distance = distance
+                        closest_monster = child
 
         #print('Closest monster found:', closest_monster)
         return closest_monster
