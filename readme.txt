@@ -1,94 +1,100 @@
-C'est un jeu de tower defense, developpé en python avec kivy/kivymd.
-Il est destiné a un affichage vertical pour smartphone Android, sa taille doit etre adaptative.
+🏰 Tower Defense Game
+This is a tower defense game developed in Python using the Kivy/KivyMD framework.
 
-Le jeu se lance via main.py : il permet de :
--Selectionner un monde 'world'.
-    Chaque monde contient ses niveaux, définis dans "niveau.py" . A coté de chaque niveau, 3 étoiles grises qui deviennent de couleur
-    "or" une fois certaines conditions de fin de niveau réussies, l'information est stockée dans "/db/stars.json".
--Acceder au shop de "tours".
-    chaque tour dans reglages_tours.py est achetable et l'information est stockée dans "/db/tower_buy.json"
--Visualiser le compteur de cristaux "/db/cristaux.json"
--Visualiser le compteur d'étoiles "/db/stars.json"
+📱 Designed for Vertical Display on Android Smartphones: The game's layout adapts to different screen sizes for a seamless mobile gaming experience.
 
+🚀 Getting Started
+Launch the game by running main.py. Here's what you can do:
 
-Lors de la selection d'un niveau selectionné, jeu.py est appelé.
+Select a World (world) 🌍:
 
-Une interface graphique s'affiche, MainLayout() composée de deux classes :
-- MapZone() ou le chemmin et les monstres vont apparaitre, ainsi que le compteur de pièces, compteur des points de vie du joueur et compteur de monstres restant.
-- TouSelectionZone() où l'utilisateur pourra selectionner des tours pour les Drag & Drop sur MapZone(). (uniquement les tours achetées stockées dans "/db/tower_buy.json")
+Each world contains its levels, defined in niveau.py.
+Next to each level, there are 3 gray stars that turn "gold" once certain level completion conditions are met. The information is stored in /db/stars.json.
+Access the Tower Shop 🛒:
 
-Le chemin(path) pour les monstres ainsi que le nombre de monstres est géré dans niveau.py.
- - Il existe aussi dans ce fichier une fonction de generation de path qui n'est pas utilisée.
- - Le décor est egalement configuré ici
+Each tower in reglages_tours.py can be purchased, and the information is stored in /db/tower_buy.json.
+View the Crystal Counter /db/cristaux.json 💎.
 
-Les tours vont attaquer les montres.
-- Le codage des tours (Classe, attaque...) est géré dans tours.py
-- Les caractéristiques de chaque tours est défini dans reglages_tours.py
-- le dossier tower_images contient les images des tours
-- Chaque tour peut etre amméliorée, ce qui augmente ses statistiques et change leur image, c'est géré par ameliorations_tours.py
+View the Star Counter /db/stars.json ⭐.
 
-Les tours vont lancer des projectiles sur les monstres
-- Le codage des projectiles (Classe, deplacement, image, ..) est géré dans projectiles.py
+When a level is selected, jeu.py is called.
 
-Le codage des montres (Classe, deplacement...) est géré dans monstres.py :
-- Les caractéristiques de chaque monstre et leur images sont définis dans reglage_monstres.py
-- le dossier "/montres_images/" contient les images des monstres
-- Les conditions d'obtention d'étoiles en fin de niveau
-- Le jeu se termine quand :
-    - Gagné : le joueur a des points de vie >0 et tous les monstres montres
-    - Perdu : le joueur n'a plus de point de vie <= 0
+🎮 Gameplay Interface
+The graphical user interface, MainLayout(), consists of two classes:
 
+MapZone(): Where the path and monsters appear, along with the coin counter, player's health points counter, and remaining monsters counter.
+TouSelectionZone(): Where the user can select towers to drag and drop onto MapZone() (only the towers purchased stored in /db/tower_buy.json).
+The path for monsters as well as the number of monsters are managed in niveau.py.
 
+There is also a path generation function in this file that is not used.
+The scenery is also set up here.
+🏹 Towers and Monsters
+Towers attack monsters.
 
-Les différentes tours :
+The coding of towers (Class, attack...) is managed in tours.py.
+The characteristics of each tower are defined in reglages_tours.py.
+The tower_images folder contains images of the towers.
+Each tower can be upgraded, enhancing its stats and changing its image, managed by ameliorations_tours.py.
+Towers launch projectiles at monsters.
 
-#Chaque tour a son type élémentaire. Une tour attaquant un monstre de même élément n'inglige pas de dégats, sauf pour l'élément "normal".
+The coding of projectiles (Class, movement, image, etc.) is managed in projectiles.py.
+The coding of monsters (Class, movement...) is managed in monstres.py:
 
-    -Basique : Inflique uniquement des degats physiques.
-               Dégats : moyen
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : 0
+The characteristics of each monster and their images are defined in reglage_monstres.py.
+The /montres_images/ folder contains images of the monsters.
+🌟 Game Outcome
+The game ends when:
+Won: the player has health points > 0 and all monsters are defeated.
+Lost: the player's health points are <= 0.
+🔥 Different Towers
+Each tower has its elemental type. A tower attacking a monster of the same element inflicts no damage, except for the "normal" element.
 
-    -Magique : Inflique uniquement des degats magiques.
-               Dégats : moyen
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : 0
+Basic: Only inflicts physical damage.
 
-    -Rapide : Inflique uniquement des degats phisiques.
-               Dégats : moyen
-               Target : monocible
-               Portée : courte
-               Cadence : rapide
-               Effet : 0
+Damage: medium
+Target: single-target
+Range: medium
+Rate: medium
+Effect: none
+Magic: Only inflicts magical damage.
 
-    - Ice : Inflige des degats magiques, et ralentit la cible.
-               Dégats : faible
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : snare
+Damage: medium
+Target: single-target
+Range: medium
+Rate: medium
+Effect: none
+Rapid: Only inflicts physical damage.
 
-    - Fire : Inflige des degats magiques, et enflamme la cible.
-               Dégats : faible
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : dot (degats magiques over time) 
+Damage: medium
+Target: single-target
+Range: short
+Rate: fast
+Effect: none
+Ice: Inflicts magical damage and slows the target.
 
-    - Elec : Inflige des degats magiques, et immobilise la cible.
-               Dégats : faible
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : root
+Damage: low
+Target: single-target
+Range: medium
+Rate: medium
+Effect: snare
+Fire: Inflicts magical damage and ignites the target.
 
-    - Bomb : Pose une bombe sur la cible..
-               Dégats : 0
-               Target : monocible
-               Portée : moyenne
-               Cadence : moyenne
-               Effet : explose après quelques secondes et inflige des degats a tous les enemis dans la zone.      
+Damage: low
+Target: single-target
+Range: medium
+Rate: medium
+Effect: dot (damage over time)
+Elec: Inflicts magical damage and immobilizes the target.
+
+Damage: low
+Target: single-target
+Range: medium
+Rate: medium
+Effect: root
+Bomb: Places a bomb on the target.
+
+Damage: none
+Target: single-target
+Range: medium
+Rate: medium
+Effect: explodes after a few seconds, damaging all enemies in the area.

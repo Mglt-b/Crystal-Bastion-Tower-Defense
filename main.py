@@ -703,7 +703,7 @@ class GameScreen(Screen):
         self.map_zone = MapZone(self.niveau)
         self.add_widget(self.map_zone)
 
-class MenuApp(MDApp):
+class CrystalBastionApp(MDApp):
     def build(self):
         sm = MDScreenManager()
         sm.add_widget(WorldScreen(name='worlds'))
@@ -738,4 +738,4 @@ class MenuApp(MDApp):
         return False  # Si ce n'est pas le bouton de retour, n'interceptez pas l'événement
 
 if __name__ == '__main__':
-    MenuApp().run()
+    CrystalBastionApp().run()

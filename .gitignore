@@ -12,3 +12,4 @@ main.spec
 /dist/
 _to_compile/
 exe/
+db/
