@@ -1,6 +1,10 @@
 # 🏰 Tower Defense Game
 
-This tower defense game is developed in Python using the Kivy/KivyMD framework, designed specifically for vertical display on Android smartphones. The game's layout adapts to different screen sizes, ensuring a seamless mobile gaming experience.
+This tower defense game is developed in Python using the Kivy/KivyMD framework, designed specifically for vertical display on Android smartphones. 
+The game's layout adapts to different screen sizes, ensuring a seamless mobile gaming experience.
+
+Kivy : https://github.com/kivy/kivy
+KivyMD : https://github.com/kivymd/KivyMD
 
 ## 📱 Designed for Vertical Display on Android Smartphones
 
