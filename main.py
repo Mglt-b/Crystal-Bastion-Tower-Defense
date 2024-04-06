@@ -1,4 +1,9 @@
-#http://www.geofish.fr/td-privacy/
+'''
+https://github.com/Mglt-b/Crystal-Bastion-Tower-Defense
+by : MGLT-b
+https://github.com/Mglt-b
+https://mglt-b.github.io/
+'''
 
 from kivy import platform
 if platform == "win":   
